@@ -4,10 +4,21 @@ root = exports ? this.codeland = {}
 root.UIcont = null
 
 root.initialize = (UIcont) ->
+    root.gameSelectionScrollPosition = 0
     root.loadJSONConfigs()
+    root.initializeDoppio()
     root.UIcont = UIcont
     player = root.getPlayer()
     root.drawGameMap(player)
+    return
+
+root.initializeDoppio = ->
+    root.doppioWrapper = 'wrapper.bsh'
+    node.fs.writeFileSync root.doppioWrapper, root.quest.commandBeanshell
+    root.doppioAPI = new DoppioApi null, console.log, root.doppioWrapper
+    # classes.doppio.JavaScript.eval("console.log(1);");
+    # root.doppioAPI = new DoppioApi null, console.log, null
+    return
 
 root.reference = () ->
 
@@ -22,6 +33,9 @@ root.drawGameMap = (player) ->
         # console.log "Game: #{game}"
         sel.buildDiv(game, descriptions[game], player.games[game], root.canPlay(game), codeland)
     addGameToMap game for game in gameSequence
+    $('#gameSelection').animate {
+        scrollTop: root.gameSelectionScrollPosition
+    }, 0
     #TODO FADE IN
     return
 
@@ -31,6 +45,7 @@ root.startGame = (game) ->
 
     gamediv = $(root.UIcont)
     tmp1 = document.getElementById("gameSelection")
+    root.gameSelectionScrollPosition = tmp1.scrollTop
     root.UIcont.removeChild(tmp1)
 
     #Todo FADE IN
@@ -126,15 +141,27 @@ root.loadJSONConfigs = () ->
 
     jQuery.ajax({
         dataType: 'json',
+        url: 'config/defaults.json',
+        async: false,
+        success: (data) ->
+            root.gameDefaults = data
+            return
+        })
+
+    jQuery.ajax({
+        dataType: 'json',
         url: 'config/quest1.json',
         async: false,
         success: (data) ->
+            root.quest = data
             for game in data.games
                 jQuery.ajax({
                     dataType: 'json',
                     url: "config/#{game}.json"
                     async: false,
                     success: (gameData) ->
+                        root.addToObject root.gameDefaults, gameData
+                        root.convertShorthandToCode gameData
                         root.gameDescriptions[game] = gameData
                         return
                     })
@@ -148,6 +175,42 @@ root.loadJSONConfigs = () ->
             root.visualMaster = data
             return
         })
+    return
+
+root.addToObject = (source, destination) ->
+    for key, value of source
+        if key of destination
+            if typeof value == "object"
+                root.addToObject value, destination[key]
+        else
+            destination[key] = value
+    return
+
+root.convertShorthandToCode = (gameData) ->
+    if gameData.code.initial?
+        return
+    initial = ''
+    shorthand = gameData.code.shorthand
+    while shorthand != ''
+        for short in gameData.code.shorthandKey
+            re = new RegExp short.regex
+            result = re.exec shorthand
+            if result != null
+                if initial != ''
+                    initial += '();\n'
+                initial += short.repl
+                break
+        if result == null
+            result = /\(.*\)/.exec shorthand
+            if result != null
+                initial += result[0] + ';'
+        if result != null
+            shorthand = shorthand.substring result.length
+        else
+            shorthand = shorthand.substring 1
+    if initial.substring initial.length - 1 != ';'
+        initial += '();'
+    gameData.code.initial = initial
     return
 
 root.getGameDescriptions = ->

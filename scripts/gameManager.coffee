@@ -37,23 +37,59 @@ class window.GameManager
 
         @environment.visualMaster.container.id = @visualDiv
         @visual = new GameVisual @environment.visualMaster, @environment.frameRate
+        @interpretGameConfigMap()
         @addEventListeners()
         return
 
-    startGame: (waitForCode) ->
+    startGame: (waitForCode) =>
         if not waitForCode?
             waitForCode = false
-
-        for character, val of @config.game.characters
-            # Load starting positions into visual config
-            @config.visual.characters[character].x = val.x
-            @config.visual.characters[character].y = val.y
-            if val.dir?
-                @config.visual.characters[character].dir = val.dir
 
         @visual.startGame @config.visual
         @gameState = new MapGameState @, waitForCode
         @commandMap = new MapGameCommands @gameState
+        return
+
+    interpretGameConfigMap: ->
+        @config.game = deepcopy @config.game
+        @config.visual = deepcopy @config.visual
+        x = @config.game.offset.x
+        y = @config.game.offset.y
+        index = 0
+        map = @config.game.map
+        while map != ""
+            achar = map.substring 0, 1
+            if achar of @config.game.key
+                name = @config.game.key[achar]
+                base = deepcopy @config.game.characterBase[name]
+                visualBase = deepcopy @config.visual.visualBase[base.sprite]
+                base.x = x
+                base.y = y
+                base.index = index
+                visualBase.x = x
+                visualBase.y = y
+                if base.dir?
+                    visualBase.dir = base.dir
+                # In case another copy of this character already exists:
+                baseName = name
+                numLength = 1
+                while name of @config.game.characters
+                    if name == baseName
+                        name = name + '1'
+                    else
+                        num = parseInt name.substring(name.length - numLength), 10
+                        num++
+                        name = baseName + num
+                        numLength = num.toString().length
+                @config.game.characters[name] = base
+                @config.visual.characters[name] = visualBase
+                index++
+            if achar == '\n'
+                y++
+                x = @config.game.offset.x
+            else
+                x++
+            map = map.substring 1
         return
 
     gameWon: (score, stars) ->
@@ -86,7 +122,17 @@ class window.GameManager
         jQuery('#resetState').click @reset
         jQuery('#refOpen').click InitFloat
         jQuery('#gmOp').click codeland.showMap
+        @codeEditor.onStudentCodeChangeListener @startGame.bind @, false
+        @codeEditor.onCommandValidation @commandsValid
+        return
 
+    commandsValid: (valid) =>
+        if valid
+            jQuery('#compileAndRun').attr 'disabled', false
+            @canRun = true
+        else
+            jQuery('#compileAndRun').attr 'disabled', true
+            @canRun = false
         return
 
     reset: =>
@@ -95,6 +141,9 @@ class window.GameManager
         return
 
     runStudentCode: =>
+        @codeEditor.scan()
+        if not @canRun
+            return
         @interpreter.scanText @codeEditor.getStudentCode()
         @startGame true
         @interpreter.executeCommands @commandMap
@@ -254,11 +303,16 @@ class MapGameState
         return moved
 
     checkCanMove: (newX, newY, character) ->
-        canNotMove = false
         if newX < 0 or newX >= @gameManager.config.visual.grid.gridX\
           or newY < 0 or newY >= @gameManager.config.visual.grid.gridY
             # Player is out of bounds of grid.
-            canNotMove = true
+            if character == @protagonist
+                if newX < -1 or newX >= @gameManager.config.visual.grid.gridX + 1\
+                  or newY < -1 or newY >= @gameManager.config.visual.grid.gridY + 1
+                    @gameLost()
+                else
+                    return false
+            return true
 
         if character.group?
             for name, otherCharacter of @gameConfig.characters
@@ -269,8 +323,8 @@ class MapGameState
                 if newX == otherCharacter.x and \
                       newY == otherCharacter.y and \
                       character.group in otherCharacter.blocks
-                    canNotMove = true
-        return canNotMove
+                    return true
+        return false
 
     turn: (direction, character) ->
         if not character?

@@ -27,7 +27,9 @@
       _ref = path.split('.'), base = _ref[0], ext = _ref[1];
       file_count++;
       cls = base.substr(base_dir.length);
-      return node.fs.writeFileSync(path, util.array_to_bytestr(file), 'utf8', true);
+      if (file.length > 0) {
+        return node.fs.writeFileSync(path, util.array_to_bytestr(file), 'utf8', true);
+      }
     };
     return untar(new util.BytesArray(util.bytestr_to_array(data)), writeOneFile);
   };
@@ -45,7 +47,6 @@
     if (root.doppioEnvironmentInitialized) {
       return;
     }
-    load_mini_rt();
     read_classfile = function(cls, cb, failure_cb) {
       var data, e, fullpath, path, _i, _len, _ref;
 

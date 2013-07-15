@@ -1,0 +1,93 @@
+{
+  "name": "Code Sequence Puzzle #9",
+  "description": "Create the correct sequence of code lines",
+  "task": "Work with parameters to functions!",
+  "tags": "intro",
+  "editor": {
+    "freeformEditting": false,
+    "buttons": [
+      "switchUp",
+      "switchDown",
+      "deleteLine",
+      "insertButtons"
+    ],
+    "commands": {
+      "go": {
+        "inputs": 1,
+        "maxUses": 6
+      },
+      "turnLeft": {
+        "inputs": 0,
+        "maxUses": 2
+      },
+      "turnRight": {
+        "inputs": 0,
+        "maxUses": 3
+      }
+    }
+  },
+  "code": {
+    "shorthand": ""
+  },
+  "game": {
+    "characterBase": {
+      "protagonist": {
+        "dir": 1
+      },
+      "guard": {
+        "dir": 0,
+        "moves": [],
+        "AI": {
+          "normal": [
+            {
+              "command": "_stand",
+              "arguments": [
+                "character"
+              ]
+            },
+            {
+              "command": "move",
+              "arguments": [
+                1,
+                "character"
+              ]
+            }
+          ],
+          "failed": {
+            "startMove": [
+              {
+                "command": "turnRight",
+                "arguments": [
+                  "character"
+                ]
+              },
+              {
+                "command": "turnRight",
+                "arguments": [
+                  "character"
+                ]
+              },
+              {
+                "command": "move",
+                "arguments": [
+                  1,
+                  "character"
+                ]
+              }
+            ]
+          }
+        }
+      }
+    },
+    "map": "XXXXXXXXXX\nX>P......X\nX.XXXX.X.X\nX.X....X.X\nX.XX.XXX.X\nX.XX.XXX.X\nXGXX...XXX\nX.X.X....X\nX.....FX.X\nXXXXXXXXXX",
+    "offset": {
+      "x": 0,
+      "y": 0
+    }
+  },
+  "help": [],
+  "dyk": [],
+  "depends": [
+    "game8"
+  ]
+}

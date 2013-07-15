@@ -10,10 +10,18 @@
   root.initialize = function(UIcont) {
     var player;
 
+    root.gameSelectionScrollPosition = 0;
     root.loadJSONConfigs();
+    root.initializeDoppio();
     root.UIcont = UIcont;
     player = root.getPlayer();
-    return root.drawGameMap(player);
+    root.drawGameMap(player);
+  };
+
+  root.initializeDoppio = function() {
+    root.doppioWrapper = 'wrapper.bsh';
+    node.fs.writeFileSync(root.doppioWrapper, root.quest.commandBeanshell);
+    root.doppioAPI = new DoppioApi(null, console.log, root.doppioWrapper);
   };
 
   root.reference = function() {};
@@ -33,6 +41,9 @@
       game = gameSequence[_i];
       addGameToMap(game);
     }
+    $('#gameSelection').animate({
+      scrollTop: root.gameSelectionScrollPosition
+    }, 0);
   };
 
   root.startGame = function(game) {
@@ -44,6 +55,7 @@
     }
     gamediv = $(root.UIcont);
     tmp1 = document.getElementById("gameSelection");
+    root.gameSelectionScrollPosition = tmp1.scrollTop;
     root.UIcont.removeChild(tmp1);
     description = root.getGameDescriptions()[game];
     env = {
@@ -159,11 +171,20 @@
     }
     jQuery.ajax({
       dataType: 'json',
+      url: 'config/defaults.json',
+      async: false,
+      success: function(data) {
+        root.gameDefaults = data;
+      }
+    });
+    jQuery.ajax({
+      dataType: 'json',
       url: 'config/quest1.json',
       async: false,
       success: function(data) {
         var game, _i, _len, _ref;
 
+        root.quest = data;
         _ref = data.games;
         for (_i = 0, _len = _ref.length; _i < _len; _i++) {
           game = _ref[_i];
@@ -172,6 +193,8 @@
             url: "config/" + game + ".json",
             async: false,
             success: function(gameData) {
+              root.addToObject(root.gameDefaults, gameData);
+              root.convertShorthandToCode(gameData);
               root.gameDescriptions[game] = gameData;
             }
           });
@@ -186,6 +209,61 @@
         root.visualMaster = data;
       }
     });
+  };
+
+  root.addToObject = function(source, destination) {
+    var key, value;
+
+    for (key in source) {
+      value = source[key];
+      if (key in destination) {
+        if (typeof value === "object") {
+          root.addToObject(value, destination[key]);
+        }
+      } else {
+        destination[key] = value;
+      }
+    }
+  };
+
+  root.convertShorthandToCode = function(gameData) {
+    var initial, re, result, short, shorthand, _i, _len, _ref;
+
+    if (gameData.code.initial != null) {
+      return;
+    }
+    initial = '';
+    shorthand = gameData.code.shorthand;
+    while (shorthand !== '') {
+      _ref = gameData.code.shorthandKey;
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        short = _ref[_i];
+        re = new RegExp(short.regex);
+        result = re.exec(shorthand);
+        if (result !== null) {
+          if (initial !== '') {
+            initial += '();\n';
+          }
+          initial += short.repl;
+          break;
+        }
+      }
+      if (result === null) {
+        result = /\(.*\)/.exec(shorthand);
+        if (result !== null) {
+          initial += result[0] + ';';
+        }
+      }
+      if (result !== null) {
+        shorthand = shorthand.substring(result.length);
+      } else {
+        shorthand = shorthand.substring(1);
+      }
+    }
+    if (initial.substring(initial.length - 1 !== ';')) {
+      initial += '();';
+    }
+    gameData.code.initial = initial;
   };
 
   root.getGameDescriptions = function() {

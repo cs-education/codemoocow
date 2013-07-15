@@ -16,7 +16,7 @@
         height: '100%',
         overflow: 'auto',
         position: 'relative',
-        'font-size': ($(window).height() * 0.02) + 'px'
+        'font-size': "20" + 'px'
       });
       $(tmp).attr("id", "gameSelection");
       this.div.append(tmp);
@@ -24,20 +24,28 @@
     }
 
     gameSelector.prototype.buildDiv = function(game, desc, player, canPlay, codeland) {
-      var tmp1;
+      var lp, tmp1;
 
       tmp1 = document.createElement("div");
       $(tmp1).css({
+        "min-width": "800px",
         width: '50%',
+        "min-height": "250px",
         height: '46%',
         'border-style': 'double',
         'border-width': 'medium',
         'margin-bottom': '1%',
         "margin-top": "1%",
         position: 'relative',
-        left: '25%',
+        left: "25%",
         "background-color": "#003366"
       });
+      if (cont.width() < 1600) {
+        lp = (cont.width() - 800) / 2;
+        $(tmp1).css({
+          left: lp
+        });
+      }
       $(tmp1).attr("id", "select" + game);
       cont.append(tmp1);
       this.buildAn(tmp1, canPlay);
@@ -147,6 +155,7 @@
         return $(ovr).css({
           'opacity': '.5',
           'width': '100%',
+          "min-height": "250px",
           'height': '100%',
           position: 'inherit',
           'z-index': '1',

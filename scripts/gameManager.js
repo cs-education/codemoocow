@@ -23,6 +23,8 @@
       this.environment = environment;
       this.runStudentCode = __bind(this.runStudentCode, this);
       this.reset = __bind(this.reset, this);
+      this.commandsValid = __bind(this.commandsValid, this);
+      this.startGame = __bind(this.startGame, this);
       this.config = this.environment.description;
       this.editorDiv = 'codeEditor';
       this.visualDiv = 'gameVisual';
@@ -71,27 +73,66 @@
       this.interpreter = new CodeInterpreter(this.config.editor.commands);
       this.environment.visualMaster.container.id = this.visualDiv;
       this.visual = new GameVisual(this.environment.visualMaster, this.environment.frameRate);
+      this.interpretGameConfigMap();
       this.addEventListeners();
     };
 
     GameManager.prototype.startGame = function(waitForCode) {
-      var character, val, _ref;
-
       if (waitForCode == null) {
         waitForCode = false;
-      }
-      _ref = this.config.game.characters;
-      for (character in _ref) {
-        val = _ref[character];
-        this.config.visual.characters[character].x = val.x;
-        this.config.visual.characters[character].y = val.y;
-        if (val.dir != null) {
-          this.config.visual.characters[character].dir = val.dir;
-        }
       }
       this.visual.startGame(this.config.visual);
       this.gameState = new MapGameState(this, waitForCode);
       this.commandMap = new MapGameCommands(this.gameState);
+    };
+
+    GameManager.prototype.interpretGameConfigMap = function() {
+      var achar, base, baseName, index, map, name, num, numLength, visualBase, x, y;
+
+      this.config.game = deepcopy(this.config.game);
+      this.config.visual = deepcopy(this.config.visual);
+      x = this.config.game.offset.x;
+      y = this.config.game.offset.y;
+      index = 0;
+      map = this.config.game.map;
+      while (map !== "") {
+        achar = map.substring(0, 1);
+        if (achar in this.config.game.key) {
+          name = this.config.game.key[achar];
+          base = deepcopy(this.config.game.characterBase[name]);
+          visualBase = deepcopy(this.config.visual.visualBase[base.sprite]);
+          base.x = x;
+          base.y = y;
+          base.index = index;
+          visualBase.x = x;
+          visualBase.y = y;
+          if (base.dir != null) {
+            visualBase.dir = base.dir;
+          }
+          baseName = name;
+          numLength = 1;
+          while (name in this.config.game.characters) {
+            if (name === baseName) {
+              name = name + '1';
+            } else {
+              num = parseInt(name.substring(name.length - numLength), 10);
+              num++;
+              name = baseName + num;
+              numLength = num.toString().length;
+            }
+          }
+          this.config.game.characters[name] = base;
+          this.config.visual.characters[name] = visualBase;
+          index++;
+        }
+        if (achar === '\n') {
+          y++;
+          x = this.config.game.offset.x;
+        } else {
+          x++;
+        }
+        map = map.substring(1);
+      }
     };
 
     GameManager.prototype.gameWon = function(score, stars) {
@@ -126,6 +167,18 @@
       jQuery('#resetState').click(this.reset);
       jQuery('#refOpen').click(InitFloat);
       jQuery('#gmOp').click(codeland.showMap);
+      this.codeEditor.onStudentCodeChangeListener(this.startGame.bind(this, false));
+      this.codeEditor.onCommandValidation(this.commandsValid);
+    };
+
+    GameManager.prototype.commandsValid = function(valid) {
+      if (valid) {
+        jQuery('#compileAndRun').attr('disabled', false);
+        this.canRun = true;
+      } else {
+        jQuery('#compileAndRun').attr('disabled', true);
+        this.canRun = false;
+      }
     };
 
     GameManager.prototype.reset = function() {
@@ -134,6 +187,10 @@
     };
 
     GameManager.prototype.runStudentCode = function() {
+      this.codeEditor.scan();
+      if (!this.canRun) {
+        return;
+      }
       this.interpreter.scanText(this.codeEditor.getStudentCode());
       this.startGame(true);
       this.interpreter.executeCommands(this.commandMap);
@@ -364,11 +421,17 @@
     };
 
     MapGameState.prototype.checkCanMove = function(newX, newY, character) {
-      var canNotMove, name, otherCharacter, _ref, _ref1;
+      var name, otherCharacter, _ref, _ref1;
 
-      canNotMove = false;
       if (newX < 0 || newX >= this.gameManager.config.visual.grid.gridX || newY < 0 || newY >= this.gameManager.config.visual.grid.gridY) {
-        canNotMove = true;
+        if (character === this.protagonist) {
+          if (newX < -1 || newX >= this.gameManager.config.visual.grid.gridX + 1 || newY < -1 || newY >= this.gameManager.config.visual.grid.gridY + 1) {
+            this.gameLost();
+          } else {
+            return false;
+          }
+        }
+        return true;
       }
       if (character.group != null) {
         _ref = this.gameConfig.characters;
@@ -381,11 +444,11 @@
             continue;
           }
           if (newX === otherCharacter.x && newY === otherCharacter.y && (_ref1 = character.group, __indexOf.call(otherCharacter.blocks, _ref1) >= 0)) {
-            canNotMove = true;
+            return true;
           }
         }
       }
-      return canNotMove;
+      return false;
     };
 
     MapGameState.prototype.turn = function(direction, character) {

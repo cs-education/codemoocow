@@ -2,8 +2,14 @@
 (function() {
   window.CodeInterpreter = (function() {
     function CodeInterpreter(commands) {
+      var command;
+
       this.commands = commands;
       this.buildNeededParsers();
+      this.usesRemaining = {};
+      for (command in this.commands) {
+        this.usesRemaining[command] = this.commands[command]['maxUses'];
+      }
       return;
     }
 
@@ -33,6 +39,22 @@
       return null;
     };
 
+    CodeInterpreter.prototype.scanCommand = function(line) {
+      var command, parameters, result;
+
+      for (command in this.commands) {
+        result = this.commands[command]['parser'].exec(line);
+        if (result !== null) {
+          parameters = this.processCommand(command, result[1]);
+          return {
+            "command": command,
+            "parameters": parameters
+          };
+        }
+      }
+      return null;
+    };
+
     CodeInterpreter.prototype.executeCommands = function(commandMap) {
       var commandCard, _i, _len, _ref;
 
@@ -52,12 +74,11 @@
           remaining.
       */
 
-      var command, currentLine, parameters, result, usesRemaining;
+      var command, currentLine, parameters, result;
 
       this.commandStack = [];
-      usesRemaining = {};
       for (command in this.commands) {
-        usesRemaining[command] = this.commands[command]['maxUses'];
+        this.usesRemaining[command] = this.commands[command]['maxUses'];
       }
       currentLine = 0;
       while (text !== "") {
@@ -65,8 +86,8 @@
         for (command in this.commands) {
           result = this.commands[command]['parser'].exec(text);
           if (result !== null) {
-            usesRemaining[command]--;
-            parameters = this.processCommand(command, result[1], usesRemaining);
+            this.usesRemaining[command]--;
+            parameters = this.processCommand(command, result[1]);
             this.commandStack.push({
               command: command,
               parameters: parameters
@@ -97,10 +118,10 @@
           text = text.substring(result[0].length);
         }
       }
-      return usesRemaining;
+      return this.usesRemaining;
     };
 
-    CodeInterpreter.prototype.processCommand = function(command, innerText, usesRemaining) {
+    CodeInterpreter.prototype.processCommand = function(command, innerText) {
       /*
           Processes a found command.
       */
