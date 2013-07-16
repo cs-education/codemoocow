@@ -18,20 +18,24 @@ class window.GameManager
         @gameDiv = jQuery @environment.gamediv
         editdiv = document.createElement("div")
         vis = document.createElement("div")
+        butdiv = document.createElement("div")
 
         $(editdiv).attr({'id':@editorDiv,'class':'code_editor'})
-        $(editdiv).css({width:'35%',height:'90%','position':'absolute','top':'5%','left':'5%'})
-
-        $(vis).attr({'id':@visualDiv,'class':'game_visual'})
-        $(vis).css({width:'35%',height:'90%','position':'absolute','top':'5%','right':'5%'})
-
+        $(editdiv).css({width:'30%',height:'80%','position':'absolute','top':'10%','left':'32.5%',"background-color":"#003366","border":"2px double rgb(204, 153, 51)"})
+        $(editdiv).append '<img style="position:absolute;bottom:0%;right:80%;" alt="Play" id="compileAndRun" src="/img/freeware/button_play_green-48px.png"/>'
+        $(editdiv).append '<img style="position:absolute;bottom:0%;right:20%;" alt="Reset" id="resetState" src="/img/cc-bynd/undo_yellow-48px.png"/>'
         @gameDiv.append(editdiv)
-        @gameDiv.append '<img alt="Java reference" id="refOpen" style="position:absolute;top:40%;right:45%" src="/img/cc0/Spiral_bound_book-128px.png"/>'
-        @gameDiv.append '<img alt="Select level" id="gmOp" style="position:absolute;top:48%;right:45%" src="/img/cc0/treasuremap-128px.png">'
-        @gameDiv.append '<img alt="About" id="about" style="position:absolute;top:56%;right:46%" src="/img/freeware/info-48px.png"/>'
-        $(editdiv).append '<img alt="Play" id="compileAndRun" src="/img/freeware/button_play_green-48px.png"/>'
-        $(editdiv).append '<img alt="Reset" id="resetState" src="/img/cc-bynd/undo_yellow-48px.png"/>'
+
+        $(vis).attr({'id':@visualDiv})
+        $(vis).css({width:'30%',height:'80%','position':'absolute','top':'10%','left':'65%',"background-color":"#003366","border":"2px double rgb(204, 153, 51)"})
         @gameDiv.append(vis)
+        
+        $(butdiv).css({width:'20%',height:'80%','position':'absolute','top':'10%','left':'2.5%',"background-color":"#003366","border":"2px double rgb(204, 153, 51)"})
+        $(butdiv).append '<img alt="Java reference" id="refOpen" style="width:30%;height:20%;position:absolute;top:15%;left:40%" src="/img/cc0/Spiral_bound_book-128px.png"/>'
+        $(butdiv).append '<img alt="Select level" id="gmOp" style="width:30%;height:20%;position:absolute;top:40%;left:40%" src="/img/cc0/treasuremap-128px.png">'
+        $(butdiv).append '<img alt="About" id="about" style="width:30%;height:20%;position:absolute;top:65%;left:40%" src="/img/freeware/info-48px.png"/>'
+        @gameDiv.append(butdiv)
+        
 
         @codeEditor = new EditorManager @editorDiv, @config.editor, @config.code
         @interpreter = new CodeInterpreter @config.editor.commands
@@ -186,6 +190,8 @@ class MapGameState
         @protagonist = @gameConfig.characters.protagonist
         @target = @gameConfig.characters.gflag
         @tick = 0
+        @tock = 0
+        @waitTime = 8
 
         for name, character of @gameConfig.characters
             if character.AI? and character.moves?
@@ -197,6 +203,7 @@ class MapGameState
             clearInterval clockHandle
         clockHandle = setInterval @clock, 17
         @startedGame = false
+        @waiting = false
         if not waitForCode then @start()
         return
 
@@ -210,13 +217,22 @@ class MapGameState
         return
 
     clock: =>
-        @tick++
         if @startedGame
             if @tick % 30 == 0
-                @checkEvents @protagonistDoneMoving
-                for name, character of @gameConfig.characters
-                    @runCharacterCommand character
-        @visual.getFrame @gameManager.config.visual, @tick
+                if not @waiting
+                    @checkEvents @protagonistDoneMoving
+                    for name, character of @gameConfig.characters
+                        @runCharacterCommand character
+                    @waiting = true
+                else
+                    for name, character of @gameConfig.characters
+                        @visual.changeState character.index, 4
+                    @waiting = false
+            if not @waiting and (@tick - @waitTime) % 30 == 0
+                @tick -= @waitTime + 1
+        @visual.getFrame @gameManager.config.visual, @tock
+        @tick++
+        @tock++
         return
 
     runCharacterCommand: (character) ->

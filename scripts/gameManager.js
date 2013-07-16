@@ -36,40 +36,54 @@
           Sets up everything for the game to run.
       */
 
-      var editdiv, vis;
+      var butdiv, editdiv, vis;
 
       this.gameDiv = jQuery(this.environment.gamediv);
       editdiv = document.createElement("div");
       vis = document.createElement("div");
+      butdiv = document.createElement("div");
       $(editdiv).attr({
         'id': this.editorDiv,
         'class': 'code_editor'
       });
       $(editdiv).css({
-        width: '35%',
-        height: '90%',
+        width: '30%',
+        height: '80%',
         'position': 'absolute',
-        'top': '5%',
-        'left': '5%'
+        'top': '10%',
+        'left': '32.5%',
+        "background-color": "#003366",
+        "border": "2px double rgb(204, 153, 51)"
       });
+      $(editdiv).append('<img style="position:absolute;bottom:0%;right:80%;" alt="Play" id="compileAndRun" src="/img/freeware/button_play_green-48px.png"/>');
+      $(editdiv).append('<img style="position:absolute;bottom:0%;right:20%;" alt="Reset" id="resetState" src="/img/cc-bynd/undo_yellow-48px.png"/>');
+      this.gameDiv.append(editdiv);
       $(vis).attr({
-        'id': this.visualDiv,
-        'class': 'game_visual'
+        'id': this.visualDiv
       });
       $(vis).css({
-        width: '35%',
-        height: '90%',
+        width: '30%',
+        height: '80%',
         'position': 'absolute',
-        'top': '5%',
-        'right': '5%'
+        'top': '10%',
+        'left': '65%',
+        "background-color": "#003366",
+        "border": "2px double rgb(204, 153, 51)"
       });
-      this.gameDiv.append(editdiv);
-      this.gameDiv.append('<img alt="Java reference" id="refOpen" style="position:absolute;top:40%;right:45%" src="/img/cc0/Spiral_bound_book-128px.png"/>');
-      this.gameDiv.append('<img alt="Select level" id="gmOp" style="position:absolute;top:48%;right:45%" src="/img/cc0/treasuremap-128px.png">');
-      this.gameDiv.append('<img alt="About" id="about" style="position:absolute;top:56%;right:46%" src="/img/freeware/info-48px.png"/>');
-      $(editdiv).append('<img alt="Play" id="compileAndRun" src="/img/freeware/button_play_green-48px.png"/>');
-      $(editdiv).append('<img alt="Reset" id="resetState" src="/img/cc-bynd/undo_yellow-48px.png"/>');
       this.gameDiv.append(vis);
+      $(butdiv).css({
+        width: '20%',
+        height: '80%',
+        'position': 'absolute',
+        'top': '10%',
+        'left': '2.5%',
+        "background-color": "#003366",
+        "border": "2px double rgb(204, 153, 51)"
+      });
+      $(butdiv).append('<img alt="Java reference" id="refOpen" style="width:30%;height:20%;position:absolute;top:15%;left:40%" src="/img/cc0/Spiral_bound_book-128px.png"/>');
+      $(butdiv).append('<img alt="Select level" id="gmOp" style="width:30%;height:20%;position:absolute;top:40%;left:40%" src="/img/cc0/treasuremap-128px.png">');
+      $(butdiv).append('<img alt="About" id="about" style="width:30%;height:20%;position:absolute;top:65%;left:40%" src="/img/freeware/info-48px.png"/>');
+      this.gameDiv.append(butdiv);
       this.codeEditor = new EditorManager(this.editorDiv, this.config.editor, this.config.code);
       this.interpreter = new CodeInterpreter(this.config.editor.commands);
       this.environment.visualMaster.container.id = this.visualDiv;
@@ -260,6 +274,8 @@
       this.protagonist = this.gameConfig.characters.protagonist;
       this.target = this.gameConfig.characters.gflag;
       this.tick = 0;
+      this.tock = 0;
+      this.waitTime = 8;
       _ref = this.gameConfig.characters;
       for (name in _ref) {
         character = _ref[name];
@@ -277,6 +293,7 @@
       }
       clockHandle = setInterval(this.clock, 17);
       this.startedGame = false;
+      this.waiting = false;
       if (!waitForCode) {
         this.start();
       }
@@ -299,20 +316,34 @@
     };
 
     MapGameState.prototype.clock = function() {
-      var character, name, _ref;
+      var character, name, _ref, _ref1;
 
-      this.tick++;
       if (this.startedGame) {
         if (this.tick % 30 === 0) {
-          this.checkEvents(this.protagonistDoneMoving);
-          _ref = this.gameConfig.characters;
-          for (name in _ref) {
-            character = _ref[name];
-            this.runCharacterCommand(character);
+          if (!this.waiting) {
+            this.checkEvents(this.protagonistDoneMoving);
+            _ref = this.gameConfig.characters;
+            for (name in _ref) {
+              character = _ref[name];
+              this.runCharacterCommand(character);
+            }
+            this.waiting = true;
+          } else {
+            _ref1 = this.gameConfig.characters;
+            for (name in _ref1) {
+              character = _ref1[name];
+              this.visual.changeState(character.index, 4);
+            }
+            this.waiting = false;
           }
         }
+        if (!this.waiting && (this.tick - this.waitTime) % 30 === 0) {
+          this.tick -= this.waitTime + 1;
+        }
       }
-      this.visual.getFrame(this.gameManager.config.visual, this.tick);
+      this.visual.getFrame(this.gameManager.config.visual, this.tock);
+      this.tick++;
+      this.tock++;
     };
 
     MapGameState.prototype.runCharacterCommand = function(character) {

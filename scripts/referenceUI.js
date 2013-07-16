@@ -157,7 +157,8 @@
       position: 'absolute',
       right: '5%',
       top: '50%',
-      'border': '1px solid black'
+      'border': '1px solid black',
+      "overflow": "auto"
     });
     $(refContainer).prepend(dictionary);
     $(refContainer).prepend(input);
@@ -288,7 +289,10 @@
     run = jQuery('<img>', {
       id: 'runCode',
       src: '/img/freeware/button_play_green-48px.png',
-      style: 'max-height:19%;display:block',
+      css: {
+        'max-height': '19%',
+        'display': 'block'
+      },
       alt: 'Run Button',
       click: function(e) {
         var finished_cb;
@@ -310,7 +314,10 @@
     abort = jQuery('<img>', {
       id: 'abortCode',
       src: '/img/freeware/button_stop_red-48px.png',
-      style: 'max-height:19%;display:block',
+      css: {
+        'max-height': '19%',
+        'display': 'block'
+      },
       alt: 'Abort Button',
       click: function(e) {
         var aborted;
@@ -379,7 +386,7 @@
       "text-align": "center"
     });
     header.innerHTML = "Legal Terms and Attributions";
-    para.innerHTML = "Copyright 2013 The Board of Trustees at the University of Illinois<br />Creative Commons Licenses from openclipart.org are     licensed under <a href='http://creativecommons.org/publicdomain/zero/1.0/''>the creative commons 0 license</a>    (Spiral Bound book, star icon, cow eat grass, treasure map)<br />    <a href='https://github.com/int3/doppio/blob/master/LICENSE'>Doppio Java Virtual Machine</a><br />Original Content is licensed under MIT Expat License    <br />Creative Commons Licenses from findicons.com are licensed under <a href='http://creativecommons.org/licenses/by-nd/2.5/'>Creative Commons Attributions no Derivatives</a>";
+    para.innerHTML = "Copyright 2013 The Board of Trustees at the University of Illinois<br />Creative Commons Licenses from openclipart.org are    licensed under <a href='http://creativecommons.org/publicdomain/zero/1.0/''>the creative commons 0 license</a>    (Spiral Bound book, star icon, cow eat grass, treasure map)<br />    <a href='https://github.com/int3/doppio/blob/master/LICENSE'>Doppio Java Virtual Machine</a><br />Original Content is licensed under MIT Expat License    <br />Creative Commons Licenses from findicons.com are licensed under <a href='http://creativecommons.org/licenses/by-nd/2.5/'>Creative Commons Attributions no Derivatives</a>";
     $(refContainer).append(header);
     $(refContainer).append(para);
     return $("#bF").click(closeClick);

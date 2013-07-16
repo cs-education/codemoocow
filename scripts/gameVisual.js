@@ -229,9 +229,6 @@
         tdist = $(lyr1).parent().parent().height() - cobj.width();
       }
       tdist = tdist / 2;
-      $(lyr1).parent().css({
-        "top": tdist
-      });
       if ($(lyr1).css("z-index") === "3") {
         this.drawFrame(lyr2, config);
         this.swapFrames(lyr2, lyr1);

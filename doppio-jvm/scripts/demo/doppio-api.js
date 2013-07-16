@@ -108,6 +108,12 @@
       var class_args, finish_cb, fname, start_time, stdin,
         _this = this;
 
+      if (this.rs !== null) {
+        if (typeof this.log === "function") {
+          this.log('Already Running, not re-starting run');
+        }
+        return;
+      }
       start_time = (new Date()).getTime();
       if (typeof this.log === "function") {
         this.log('Starting Run');
