@@ -294,6 +294,7 @@
         'display': 'block'
       },
       alt: 'Run Button',
+      title: 'Run the program',
       click: function(e) {
         var finished_cb;
 
@@ -319,6 +320,7 @@
         'display': 'block'
       },
       alt: 'Abort Button',
+      title: 'Stop the currently running program',
       click: function(e) {
         var aborted;
 
