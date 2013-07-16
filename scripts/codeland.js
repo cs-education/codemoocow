@@ -7,6 +7,14 @@
 
   root.UIcont = null;
 
+  if (console.log === null) {
+    console.log = function() {};
+  }
+
+  root.log = function(msg) {
+    return console.log.call(console, msg);
+  };
+
   root.initialize = function(UIcont) {
     var player;
 
@@ -21,7 +29,7 @@
   root.initializeDoppio = function() {
     root.doppioWrapper = 'wrapper.bsh';
     node.fs.writeFileSync(root.doppioWrapper, root.quest.commandBeanshell);
-    root.doppioAPI = new DoppioApi(null, console.log, root.doppioWrapper);
+    root.doppioAPI = new DoppioApi(null, root.log);
   };
 
   root.reference = function() {};
@@ -76,10 +84,6 @@
     return $.extend(true, {}, src);
   };
 
-  if (console.log === null) {
-    console.log = function() {};
-  }
-
   root.getString = function(key) {
     return localStorage.getItem(key);
   };
@@ -124,6 +128,10 @@
   };
 
   root.showMap = function() {
+    if (root.currentGame) {
+      root.currentGame.finishGame();
+    }
+    root.currentGame = null;
     root.drawGameMap(root.getPlayer());
   };
 
@@ -166,13 +174,20 @@
   };
 
   root.loadJSONConfigs = function() {
+    var configFail;
+
     if (root.gameDescriptions == null) {
       root.gameDescriptions = {};
     }
+    configFail = false;
     jQuery.ajax({
       dataType: 'json',
       url: 'config/defaults.json',
       async: false,
+      error: function() {
+        configFail = true;
+        return console.log('Could not read defaults.json');
+      },
       success: function(data) {
         root.gameDefaults = data;
       }
@@ -181,6 +196,10 @@
       dataType: 'json',
       url: 'config/quest1.json',
       async: false,
+      error: function() {
+        configFail = true;
+        return console.log("Could not read quest1.json");
+      },
       success: function(data) {
         var game, _i, _len, _ref;
 
@@ -192,10 +211,23 @@
             dataType: 'json',
             url: "config/" + game + ".json",
             async: false,
+            error: function(jqXHR, textStatus, errorThrown) {
+              configFail = true;
+              return console.log("Could not read " + game + ':' + textStatus);
+            },
             success: function(gameData) {
-              root.addToObject(root.gameDefaults, gameData);
-              root.convertShorthandToCode(gameData);
-              root.gameDescriptions[game] = gameData;
+              var error;
+
+              try {
+                root.addToObject(root.gameDefaults, gameData);
+                root.convertShorthandToCode(gameData);
+                root.addHintsToCode(gameData);
+                root.gameDescriptions[game] = gameData;
+              } catch (_error) {
+                error = _error;
+                configFail = true;
+                return console.log(error);
+              }
             }
           });
         }
@@ -205,10 +237,18 @@
       dataType: 'json',
       url: 'config/visualMaster.json',
       async: false,
+      error: function() {
+        configFail = true;
+        return console.log("Could not read visualMaster.json");
+      },
       success: function(data) {
         root.visualMaster = data;
       }
     });
+    if (configFail) {
+      root.gameDescriptions = null;
+      throw "Configuration Exception";
+    }
   };
 
   root.addToObject = function(source, destination) {
@@ -227,7 +267,7 @@
   };
 
   root.convertShorthandToCode = function(gameData) {
-    var initial, re, result, short, shorthand, _i, _len, _ref;
+    var initial, last, re, result, short, shorthand, _i, _len, _ref;
 
     if (gameData.code.initial != null) {
       return;
@@ -242,28 +282,42 @@
         result = re.exec(shorthand);
         if (result !== null) {
           if (initial !== '') {
-            initial += '();\n';
+            last = initial.substring(initial.length - 1);
+            if (last === ';') {
+              initial += '\n';
+            } else if (last !== '\n') {
+              initial += '();\n';
+            }
           }
           initial += short.repl;
           break;
         }
       }
       if (result === null) {
-        result = /\(.*\)/.exec(shorthand);
+        result = /\(.*?\)/.exec(shorthand);
         if (result !== null) {
           initial += result[0] + ';';
         }
       }
       if (result !== null) {
-        shorthand = shorthand.substring(result.length);
+        shorthand = shorthand.substring(result[0].length);
       } else {
         shorthand = shorthand.substring(1);
       }
     }
-    if (initial.substring(initial.length - 1 !== ';')) {
+    if (initial !== '' && initial.substring(initial.length - 1) !== ';') {
       initial += '();';
     }
     gameData.code.initial = initial;
+  };
+
+  root.addHintsToCode = function(gameData) {
+    var one;
+
+    if (gameData.code.comments) {
+      one = '// ' + ((gameData.code.comments.join('\n')).replace(/\n/g, '\n// '));
+      return gameData.code.initial = one + '\n' + gameData.code.initial;
+    }
   };
 
   root.getGameDescriptions = function() {

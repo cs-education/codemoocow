@@ -99,7 +99,7 @@
       return typeof this.log === "function" ? this.log("Untarring took a total of " + (end_untar - start_untar) + "ms.") : void 0;
     };
 
-    DoppioApi.prototype.run = function(studentCode) {
+    DoppioApi.prototype.run = function(studentCode, beanshellWrapperName, finished_cb) {
       /*
           Runs the given Java Code.
           Note, this does not recognize classes.
@@ -117,8 +117,8 @@
       stdin = function() {
         return "\n";
       };
-      if (this.beanshellWrapperName != null) {
-        class_args = [this.beanshellWrapperName];
+      if (beanshellWrapperName != null) {
+        class_args = [beanshellWrapperName];
       } else {
         class_args = [fname];
       }
@@ -135,12 +135,13 @@
           }
           _this.rs = null;
         }
+        finished_cb();
       };
       this.rs = new runtime.RuntimeState(this.stdout, stdin, this.bs_cl);
       jvm.run_class(this.rs, 'bsh/Interpreter', class_args, finish_cb);
     };
 
-    DoppioApi.prototype.abort = function() {
+    DoppioApi.prototype.abort = function(finished_cb) {
       /*
           Abort the current run.
       */
@@ -159,7 +160,10 @@
           if (typeof _this.log === "function") {
             _this.log('Aborted Successfully');
           }
-          return _this.rs = null;
+          _this.rs = null;
+          if (finished_cb != null) {
+            return finished_cb();
+          }
         };
         this.rs.async_abort(cb);
       } else {

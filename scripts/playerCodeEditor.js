@@ -19,9 +19,11 @@
       this.codeConfig = codeConfig;
       this.onEditorClick = __bind(this.onEditorClick, this);
       this.onEditorCursorMove = __bind(this.onEditorCursorMove, this);
+      this.moveEditorButtons = __bind(this.moveEditorButtons, this);
       this.scan = __bind(this.scan, this);
       this.onStudentCodeChange = __bind(this.onStudentCodeChange, this);
       this.resetEditor = __bind(this.resetEditor, this);
+      this.acelne = null;
       this.onStudentCodeChangeCallback = null;
       this.commands = this.editorConfig.commands;
       this.setUpEditor();
@@ -38,7 +40,7 @@
           the player code editor.
       */
 
-      var buttonField, editorDiv;
+      var buttonField, d, editorDiv, u, x;
 
       editorDiv = jQuery("#" + this.editorDivId);
       editorDiv.append('<div id="ace-editor"></div>');
@@ -46,15 +48,6 @@
         buttonField = jQuery('<div>', {
           id: 'buttons'
         });
-        if ($.inArray('switchUp', this.editorConfig.buttons) !== -1) {
-          buttonField.append('<button id="switchUp">Up</button>');
-        }
-        if ($.inArray('switchDown', this.editorConfig.buttons) !== -1) {
-          buttonField.append('<button id="switchDown">Down</button>');
-        }
-        if ($.inArray('deleteLine', this.editorConfig.buttons) !== -1) {
-          buttonField.append('<button id="deleteLine">Delete</button>');
-        }
         if ($.inArray('insertButtons', this.editorConfig.buttons) !== -1) {
           buttonField.append('<br />');
           buttonField.append(jQuery('<div>', {
@@ -65,8 +58,49 @@
         editorDiv.append(buttonField.get(0));
       }
       editorDiv.append('<div id="parameter-pop-up" class="pop-up-container"></div>');
+      if ($.inArray('switchUp', this.editorConfig.buttons) !== -1) {
+        this.switchUpImg = 'img/ua-usable.png';
+      } else {
+        this.switchUpImg = 'img/ua.png';
+      }
+      if ($.inArray('switchDown', this.editorConfig.buttons) !== -1) {
+        this.switchDownImg = 'img/da-usable.png';
+      } else {
+        this.switchDownImg = 'img/da.png';
+      }
+      if ($.inArray('deleteLine', this.editorConfig.buttons) !== -1) {
+        this.deleteImg = 'img/cx-usable.png';
+      } else {
+        this.deleteImg = 'img/cx.png';
+      }
       this.editor = new PlayerCodeEditor('ace-editor', this.commands, this.codeConfig.initial, this.codeConfig.show, this.codeConfig.prefix, this.codeConfig.postfix, this.editorConfig.freeformEditting);
       this.interpreter = new CodeInterpreter(this.commands);
+      this.acelne = document.createElement("div");
+      x = document.createElement("img");
+      $(x).attr({
+        "src": "" + this.deleteImg,
+        "class": "ace_xbutton"
+      });
+      u = document.createElement("img");
+      $(u).attr({
+        "src": "" + this.switchUpImg,
+        "class": "ace_uparrow"
+      });
+      d = document.createElement("img");
+      $(d).attr({
+        "src": "" + this.switchDownImg,
+        "class": "ace_downarrow"
+      });
+      $(this.acelne).append(x);
+      $(this.acelne).append(u);
+      $(this.acelne).append(d);
+      $(this.acelne).attr({
+        "id": "acelne"
+      });
+      $(this.acelne).css({
+        "z-index": -1
+      });
+      $('body').append(this.acelne);
       this.setUpInsertButtons();
       this.addEventListeners();
       return this.onStudentCodeChange();
@@ -110,13 +144,19 @@
 
       ed = this.editor;
       if ($.inArray('switchUp', this.editorConfig.buttons) !== -1) {
-        jQuery('#switchUp').click(ed.button(ed.usesCurrentPosition(ed.switchUp)));
+        jQuery('.ace_uparrow').click(ed.button(ed.usesCurrentPosition(ed.switchUp)));
+      } else {
+        jQuery('.ace_uparrow').click(ed.editor.focus);
       }
       if ($.inArray('switchDown', this.editorConfig.buttons) !== -1) {
-        jQuery('#switchDown').click(ed.button(ed.usesCurrentPosition(ed.switchDown)));
+        jQuery('.ace_downarrow').click(ed.button(ed.usesCurrentPosition(ed.switchDown)));
+      } else {
+        jQuery('.ace_downarrow').click(ed.editor.focus);
       }
       if ($.inArray('deleteLine', this.editorConfig.buttons) !== -1) {
-        jQuery('#deleteLine').click(ed.button(ed.usesTextDocument(ed.usesCurrentRow(ed.deleteLine))));
+        jQuery('.ace_xbutton').click(ed.button(ed.usesTextDocument(ed.usesCurrentRow(ed.deleteLine))));
+      } else {
+        jQuery('.ace_xbutton').click(ed.editor.focus);
       }
       ed.onChangeListener(this.onStudentCodeChange);
       ed.onClickListener(this.onEditorClick);
@@ -185,11 +225,36 @@
       }
     };
 
+    EditorManager.prototype.moveEditorButtons = function() {
+      var aglh, aglpl, aglw, offset, row;
+
+      row = this.editor.editor.getCursorPosition().row;
+      offset = $('.ace_gutter-layer').children().eq(row).position();
+      $('.ace_gutter').append(this.acelne);
+      aglw = $('.ace_gutter-layer').width();
+      aglh = $('.ace_gutter-cell').height();
+      aglpl = $('.ace_gutter-cell').css("padding-left");
+      $(this.acelne).css({
+        "width": aglw,
+        "height": aglh,
+        "z-index": 20,
+        "background-color": "white",
+        "position": "absolute",
+        "right": aglpl,
+        "bottom": aglh,
+        "top": "" + offset.top + "px",
+        "left": "" + offset.left + "px"
+      });
+    };
+
     EditorManager.prototype.onEditorCursorMove = function(cursorEvent) {
       if (this.parameterPopUp === void 0) {
         this.parameterPopUp = jQuery('#parameter-pop-up');
       }
-      return this.parameterPopUp.hide();
+      if (!this.movingButtons) {
+        setTimeout(this.moveEditorButtons, 20);
+      }
+      this.parameterPopUp.hide();
     };
 
     EditorManager.prototype.onEditorClick = function(inBounds, clickEvent) {
@@ -203,11 +268,11 @@
 
       var button, codeParam, command, commandInfo, editorOffset, gutterOffset, i, id, line, manager, numberOfInputs, row, rowLength, _i, _ref1;
 
+      row = clickEvent.$pos.row;
       if (this.parameterPopUp === void 0) {
         this.parameterPopUp = jQuery('#parameter-pop-up');
       }
       if (inBounds) {
-        row = clickEvent.$pos.row;
         line = clickEvent.editor.getSession().getLine(row);
         rowLength = line.length;
         if (rowLength === 0) {
@@ -215,6 +280,10 @@
           return true;
         }
         commandInfo = this.interpreter.scanCommand(line);
+        if (commandInfo === null) {
+          clickEvent.stopPropagation();
+          return false;
+        }
         command = commandInfo.command;
         if (command === null) {
           this.parameterPopUp.hide();
@@ -274,6 +343,7 @@
         setTimeout((function() {
           jQuery("#" + command + "-parameter-" + 1).focus();
         }), 0);
+        clickEvent.stopPropagation();
         return false;
       } else {
         this.parameterPopUp.hide();
@@ -393,7 +463,7 @@
     };
 
     PlayerCodeEditor.prototype.onCursorMoveListener = function(callback) {
-      this.editSession.getSelection().on('changeCursor', callback);
+      this.editor.on('changeSelection', callback);
     };
 
     PlayerCodeEditor.prototype.switchUp = function(_arg) {

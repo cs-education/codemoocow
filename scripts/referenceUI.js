@@ -153,7 +153,7 @@
     });
     $(output).css({
       width: '50%',
-      height: '40%',
+      height: '45%',
       position: 'absolute',
       right: '5%',
       top: '50%',
@@ -224,7 +224,8 @@
     };
     closeClick = function() {
       $(backFade).remove();
-      return $(refContainer).remove();
+      $(refContainer).remove();
+      return codeland.doppioAPI.abort();
     };
     clClick = function() {
       $(this).unbind();
@@ -284,26 +285,104 @@
     };
     log = console.log;
     codeland.doppioAPI.setOutputFunctions(stdout, log);
-    run = jQuery('<button>', {
+    run = jQuery('<img>', {
       id: 'runCode',
-      text: 'Run',
+      src: '/img/freeware/button_play_green-48px.png',
+      style: 'max-height:19%;display:block',
+      alt: 'Run Button',
       click: function(e) {
-        textOutput.text('');
+        var finished_cb;
+
+        textOutput.text('Running...');
+        jQuery('#runCode').hide(2000, function() {
+          return jQuery('#abortCode').show();
+        });
         msg = '';
-        codeland.doppioAPI.run(sandBoxEditor.getStudentCode());
+        finished_cb = function() {
+          return jQuery('#abortCode').hide(500, function() {
+            return jQuery('#runCode').show();
+          });
+        };
+        codeland.doppioAPI.run(sandBoxEditor.getStudentCode(), null, finished_cb);
         e.preventDefault();
       }
     });
-    abort = jQuery('<button>', {
+    abort = jQuery('<img>', {
       id: 'abortCode',
-      text: 'Abort',
+      src: '/img/freeware/button_stop_red-48px.png',
+      style: 'max-height:19%;display:block',
+      alt: 'Abort Button',
       click: function(e) {
-        codeland.doppioAPI.abort();
+        var aborted;
+
+        aborted = function() {
+          stdout("Stopped");
+          jQuery('#runCode').show();
+          return jQuery('#abortCode').hide();
+        };
+        codeland.doppioAPI.abort(aborted);
         e.preventDefault();
       }
     });
+    abort.hide();
     input.append(run.get(0));
     input.append(abort.get(0));
+  };
+
+  window.AboutPage = function() {
+    var backFade, closeClick, header, para, refContainer;
+
+    closeClick = function() {
+      $(backFade).remove();
+      return $(refContainer).remove();
+    };
+    backFade = document.createElement("div");
+    refContainer = document.createElement("div");
+    $(backFade).css({
+      width: '100%',
+      height: '100%',
+      position: 'absolute',
+      'z-index': '300',
+      'background-color': '#000000',
+      'opacity': '.5'
+    });
+    $(refContainer).css({
+      width: '40%',
+      height: '40%',
+      left: '30%',
+      top: '30%',
+      position: 'absolute',
+      'z-index': '301',
+      'background-color': '#FFFFFF'
+    });
+    $("body").prepend(backFade);
+    $(backFade).attr({
+      id: 'bF'
+    });
+    $("body").prepend(refContainer);
+    header = document.createElement("div");
+    para = document.createElement("div");
+    $(header).css({
+      "font-size": "26px",
+      "position": "absolute",
+      "width": "50%",
+      "top": "5%",
+      "left": "25%",
+      "text-align": "center"
+    });
+    $(para).css({
+      "font-size": "14px",
+      "position": "absolute",
+      "width": "90%",
+      "bottom": "12%",
+      "left": "5%",
+      "text-align": "center"
+    });
+    header.innerHTML = "Legal Terms and Attributions";
+    para.innerHTML = "Copyright 2013 The Board of Trustees at the University of Illinois<br />Creative Commons Licenses from openclipart.org are     licensed under <a href='http://creativecommons.org/publicdomain/zero/1.0/''>the creative commons 0 license</a>    (Spiral Bound book, star icon, cow eat grass, treasure map)<br />    <a href='https://github.com/int3/doppio/blob/master/LICENSE'>Doppio Java Virtual Machine</a><br />Original Content is licensed under MIT Expat License    <br />Creative Commons Licenses from findicons.com are licensed under <a href='http://creativecommons.org/licenses/by-nd/2.5/'>Creative Commons Attributions no Derivatives</a>";
+    $(refContainer).append(header);
+    $(refContainer).append(para);
+    return $("#bF").click(closeClick);
   };
 
 }).call(this);

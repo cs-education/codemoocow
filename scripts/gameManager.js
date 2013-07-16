@@ -25,7 +25,7 @@
       this.reset = __bind(this.reset, this);
       this.commandsValid = __bind(this.commandsValid, this);
       this.startGame = __bind(this.startGame, this);
-      this.config = this.environment.description;
+      this.config = deepcopy(this.environment.description);
       this.editorDiv = 'codeEditor';
       this.visualDiv = 'gameVisual';
       this.setUpGame();
@@ -64,10 +64,11 @@
         'right': '5%'
       });
       this.gameDiv.append(editdiv);
-      this.gameDiv.append('<button id="refOpen" style="position:absolute;top:40%;right:45%">Reference</button>');
-      this.gameDiv.append('<button id="gmOp" style="position:absolute;top:48%;right:45%">Game Map</button>');
-      $(editdiv).append('<button id="compileAndRun">Go</button>');
-      $(editdiv).append('<button id="resetState">Reset</button>');
+      this.gameDiv.append('<img alt="Java reference" id="refOpen" style="position:absolute;top:40%;right:45%" src="/img/cc0/Spiral_bound_book-128px.png"/>');
+      this.gameDiv.append('<img alt="Select level" id="gmOp" style="position:absolute;top:48%;right:45%" src="/img/cc0/treasuremap-128px.png">');
+      this.gameDiv.append('<img alt="About" id="about" style="position:absolute;top:56%;right:46%" src="/img/freeware/info-48px.png"/>');
+      $(editdiv).append('<img alt="Play" id="compileAndRun" src="/img/freeware/button_play_green-48px.png"/>');
+      $(editdiv).append('<img alt="Reset" id="resetState" src="/img/cc-bynd/undo_yellow-48px.png"/>');
       this.gameDiv.append(vis);
       this.codeEditor = new EditorManager(this.editorDiv, this.config.editor, this.config.code);
       this.interpreter = new CodeInterpreter(this.config.editor.commands);
@@ -87,43 +88,16 @@
     };
 
     GameManager.prototype.interpretGameConfigMap = function() {
-      var achar, base, baseName, index, map, name, num, numLength, visualBase, x, y;
+      var achar, character, key, map, name, x, y, _ref;
 
-      this.config.game = deepcopy(this.config.game);
-      this.config.visual = deepcopy(this.config.visual);
       x = this.config.game.offset.x;
       y = this.config.game.offset.y;
-      index = 0;
       map = this.config.game.map;
       while (map !== "") {
         achar = map.substring(0, 1);
         if (achar in this.config.game.key) {
           name = this.config.game.key[achar];
-          base = deepcopy(this.config.game.characterBase[name]);
-          visualBase = deepcopy(this.config.visual.visualBase[base.sprite]);
-          base.x = x;
-          base.y = y;
-          base.index = index;
-          visualBase.x = x;
-          visualBase.y = y;
-          if (base.dir != null) {
-            visualBase.dir = base.dir;
-          }
-          baseName = name;
-          numLength = 1;
-          while (name in this.config.game.characters) {
-            if (name === baseName) {
-              name = name + '1';
-            } else {
-              num = parseInt(name.substring(name.length - numLength), 10);
-              num++;
-              name = baseName + num;
-              numLength = num.toString().length;
-            }
-          }
-          this.config.game.characters[name] = base;
-          this.config.visual.characters[name] = visualBase;
-          index++;
+          this.generateCharacter(name, x, y, true);
         }
         if (achar === '\n') {
           y++;
@@ -133,6 +107,64 @@
         }
         map = map.substring(1);
       }
+      _ref = this.config.game.characters;
+      for (key in _ref) {
+        character = _ref[key];
+        character.index = this.config.visual.characters.indexOf(character.visual);
+      }
+    };
+
+    GameManager.prototype.generateCharacter = function(name, x, y, staysOnReset, dir) {
+      var base, baseName, gflag, num, numLength, visualBase;
+
+      base = deepcopy(this.config.game.characterBase[name]);
+      visualBase = deepcopy(this.config.visual.visualBase[base.sprite]);
+      base.x = x;
+      base.y = y;
+      visualBase.x = x;
+      visualBase.y = y;
+      if (dir != null) {
+        base.dir = dir;
+      }
+      if (base.dir != null) {
+        visualBase.dir = base.dir;
+      }
+      baseName = name;
+      numLength = 1;
+      while (name in this.config.game.characters) {
+        if (name === baseName) {
+          name = name + '1';
+        } else {
+          num = parseInt(name.substring(name.length - numLength), 10);
+          num++;
+          name = baseName + num;
+          numLength = num.toString().length;
+        }
+      }
+      visualBase.name = name;
+      base.visual = visualBase;
+      if (staysOnReset) {
+        if (name === 'gflag') {
+          this.config.visual.characters.unshift(visualBase);
+        } else if (name === 'protagonist') {
+          if (this.config.visual.characters.length > 0) {
+            if (this.config.visual.characters[0].name = 'gflag') {
+              gflag = this.config.visual.characters.shift();
+              this.config.visual.characters.unshift(visualBase);
+              this.config.visual.characters.unshift(gflag);
+            }
+          } else {
+            this.config.visual.characters.push(visualBase);
+          }
+        } else {
+          this.config.visual.characters.push(visualBase);
+        }
+        this.config.game.characters[name] = base;
+      }
+      return {
+        'game': base,
+        'visual': visualBase
+      };
     };
 
     GameManager.prototype.gameWon = function(score, stars) {
@@ -157,9 +189,16 @@
     };
 
     GameManager.prototype.finishGame = function() {
+      var _ref;
+
+      if ((_ref = this.gameState) != null) {
+        _ref.stopGame();
+      }
       this.codeEditor = null;
       this.interpreter = null;
       this.visual = null;
+      this.gameState = null;
+      this.commandMap = null;
     };
 
     GameManager.prototype.addEventListeners = function() {
@@ -167,6 +206,7 @@
       jQuery('#resetState').click(this.reset);
       jQuery('#refOpen').click(InitFloat);
       jQuery('#gmOp').click(codeland.showMap);
+      jQuery('#about').click(AboutPage);
       this.codeEditor.onStudentCodeChangeListener(this.startGame.bind(this, false));
       this.codeEditor.onCommandValidation(this.commandsValid);
     };
@@ -209,6 +249,7 @@
       var character, command, name, _i, _len, _ref, _ref1;
 
       this.gameManager = gameManager;
+      this.stopGame = __bind(this.stopGame, this);
       this.gameLost = __bind(this.gameLost, this);
       this.gameWon = __bind(this.gameWon, this);
       this.clock = __bind(this.clock, this);
@@ -261,12 +302,14 @@
       var character, name, _ref;
 
       this.tick++;
-      if (this.startedGame && this.tick % 30 === 0) {
-        this.checkEvents(this.protagonistDoneMoving);
-        _ref = this.gameConfig.characters;
-        for (name in _ref) {
-          character = _ref[name];
-          this.runCharacterCommand(character);
+      if (this.startedGame) {
+        if (this.tick % 30 === 0) {
+          this.checkEvents(this.protagonistDoneMoving);
+          _ref = this.gameConfig.characters;
+          for (name in _ref) {
+            character = _ref[name];
+            this.runCharacterCommand(character);
+          }
         }
       }
       this.visual.getFrame(this.gameManager.config.visual, this.tick);
@@ -308,6 +351,15 @@
         this.runCharacterCommand(character);
       } else {
         this.score++;
+      }
+    };
+
+    MapGameState.prototype.leaveTrail = function(placeTrail) {
+      var char;
+
+      if ((placeTrail != null) && !this.protagonistDoneMoving) {
+        char = this.gameManager.generateCharacter('trail', placeTrail.x, placeTrail.y, false);
+        this.visual.pushCharacter(this.gameManager.config.visual, char.visual);
       }
     };
 
@@ -411,6 +463,12 @@
       hitEvent = this.checkCanMove(newx, newy, character);
       if (!hitEvent) {
         this.visual.changeState(character.index, character.dir);
+        if (character === this.protagonist) {
+          this.leaveTrail({
+            'x': character.x,
+            'y': character.y
+          });
+        }
         character.x = newx;
         character.y = newy;
         moved = true;
@@ -532,6 +590,7 @@
 
     MapGameState.prototype.gameWon = function() {
       clearInterval(clockHandle);
+      playAudio('victory.ogg');
       this.stars += 1;
       this.score += 5;
       this.gameManager.gameWon(this.score, this.stars);
@@ -549,9 +608,25 @@
         this.visual.changeState(character.index, 4);
         character.moves = null;
       }
+      playAudio('defeat.ogg');
       this.startedGame = false;
-      alert("You Have Lost!");
+      alert("Try again!");
       clockHandle = setInterval(this.clock, 17);
+    };
+
+    MapGameState.prototype.stopGame = function() {
+      var character, name, _ref;
+
+      if (clockHandle != null) {
+        clearInterval(clockHandle);
+      }
+      _ref = this.gameConfig.characters;
+      for (name in _ref) {
+        character = _ref[name];
+        this.visual.changeState(character.index, 4);
+        character.moves = null;
+      }
+      this.startedGame = false;
     };
 
     MapGameState.prototype.computeStepInDirection = function(direction, currentX, currentY) {

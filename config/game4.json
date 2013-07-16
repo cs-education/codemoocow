@@ -1,6 +1,6 @@
 {
-  "name": "Code Sequence Puzzle #4",
-  "description": "Find the correct sequence of code lines",
+  "name": "Puzzle #4",
+  "description": "Ingredients: May contains bugs! Delete Delete!",
   "task": "Re-order existing code that only uses a small set of statements",
   "tags": "intro",
   "editor": {
@@ -24,7 +24,10 @@
     }
   },
   "code": {
-    "shorthand": "RRRRggLg"
+    "shorthand": "RRRRggLg",
+    "comments" : ["There's 'bug'! Time to debug this code!", 
+    "Hint #1 In this game you must DELETE the unnecessary statements.",
+    "Hint #2 Use the reset button if you delete too much."	 ]
   },
   "game": {
     "characterBase": {
@@ -39,7 +42,7 @@
     }
   },
   "help": [
-    "Time to play! Write some test programs to discover out what each mystery function does"
+    
   ],
   "dyk": [],
   "depends": [

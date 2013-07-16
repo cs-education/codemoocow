@@ -10,6 +10,7 @@
 
       this.div = div;
       this.dis = dis;
+      $("#acelne").remove();
       tmp = document.createElement("div");
       cont = $(tmp);
       $(tmp).css({
@@ -24,34 +25,32 @@
     }
 
     gameSelector.prototype.buildDiv = function(game, desc, player, canPlay, codeland) {
-      var lp, tmp1;
+      var gameDiv, img, src;
 
-      tmp1 = document.createElement("div");
-      $(tmp1).css({
-        "min-width": "800px",
-        width: '50%',
-        "min-height": "250px",
-        height: '46%',
-        'border-style': 'double',
-        'border-width': 'medium',
-        'margin-bottom': '1%',
-        "margin-top": "1%",
-        position: 'relative',
-        left: "25%",
-        "background-color": "#003366"
+      gameDiv = document.createElement("span");
+      $(gameDiv).css({
+        "min-width": "32px",
+        "min-height": "32px",
+        "padding": "5px"
       });
-      if (cont.width() < 1600) {
-        lp = (cont.width() - 800) / 2;
-        $(tmp1).css({
-          left: lp
-        });
+      $(gameDiv).attr("id", "select" + game);
+      cont.append(gameDiv);
+      src = '/img/stare.png';
+      if ((player != null ? player.passed : void 0) === true) {
+        src = '/img/star.png';
       }
-      $(tmp1).attr("id", "select" + game);
-      cont.append(tmp1);
-      this.buildAn(tmp1, canPlay);
-      this.buildScore(tmp1, player);
-      this.buildInfo(tmp1, desc);
-      return this.canPlay(tmp1, canPlay, codeland, game);
+      img = jQuery('<img>', {
+        id: 'star',
+        src: src,
+        style: 'max-height:32px',
+        alt: "Start Game",
+        title: desc.description
+      });
+      $(gameDiv).click(function() {
+        return codeland.startGame(game);
+      });
+      $(gameDiv).append(img.get(0));
+      return $(gameDiv).append(game);
     };
 
     gameSelector.prototype.buildAn = function(con, canPlay) {
