@@ -9,9 +9,8 @@
         Please do not call the constructor until the entire document has loaded
         (this is usually accomplished with jQuery(document).onReady)
     */
-    function DoppioApi(stdout, log, beanshellWrapperName) {
+    function DoppioApi(stdout, logIgnore, beanshellWrapperName) {
       this.stdout = stdout;
-      this.log = log;
       this.beanshellWrapperName = beanshellWrapperName;
       this.abort = __bind(this.abort, this);
       this.run = __bind(this.run, this);
@@ -96,7 +95,7 @@
       };
       untar(new util.BytesArray(util.bytestr_to_array(data)), writeOneFile);
       end_untar = (new Date()).getTime();
-      return typeof this.log === "function" ? this.log("Untarring took a total of " + (end_untar - start_untar) + "ms.") : void 0;
+      return typeof console !== "undefined" && console !== null ? console.log("Untarring took a total of " + (end_untar - start_untar) + "ms.") : void 0;
     };
 
     DoppioApi.prototype.run = function(studentCode, beanshellWrapperName, finished_cb) {
@@ -109,14 +108,14 @@
         _this = this;
 
       if (this.rs !== null) {
-        if (typeof this.log === "function") {
-          this.log('Already Running, not re-starting run');
+        if (typeof console !== "undefined" && console !== null) {
+          console.log('Already Running, not re-starting run');
         }
         return;
       }
       start_time = (new Date()).getTime();
-      if (typeof this.log === "function") {
-        this.log('Starting Run');
+      if (typeof console !== "undefined" && console !== null) {
+        console.log('Starting Run');
       }
       fname = 'program.bsh';
       node.fs.writeFileSync(fname, studentCode);
@@ -133,11 +132,11 @@
 
         end_time = (new Date()).getTime();
         if (_this.rs !== null) {
-          if (typeof _this.log === "function") {
-            _this.log('Finished Run');
+          if (typeof console !== "undefined" && console !== null) {
+            console.log('Finished Run');
           }
-          if (typeof _this.log === "function") {
-            _this.log("Took " + (end_time - start_time) + "ms.");
+          if (typeof console !== "undefined" && console !== null) {
+            console.log("Took " + (end_time - start_time) + "ms.");
           }
           _this.rs = null;
         }
@@ -155,16 +154,16 @@
       var cb,
         _this = this;
 
-      if (typeof this.log === "function") {
-        this.log('User Abort Requested');
+      if (typeof console !== "undefined" && console !== null) {
+        console.log('User Abort Requested');
       }
       if (this.rs) {
-        if (typeof this.log === "function") {
-          this.log('Aborting Run');
+        if (typeof console !== "undefined" && console !== null) {
+          console.log('Aborting Run');
         }
         cb = function() {
-          if (typeof _this.log === "function") {
-            _this.log('Aborted Successfully');
+          if (typeof console !== "undefined" && console !== null) {
+            console.log('Aborted Successfully');
           }
           _this.rs = null;
           if (finished_cb != null) {
@@ -173,8 +172,8 @@
         };
         this.rs.async_abort(cb);
       } else {
-        if (typeof this.log === "function") {
-          this.log('No Run Detected');
+        if (typeof console !== "undefined" && console !== null) {
+          console.log('No Run Detected');
         }
       }
     };
