@@ -28,8 +28,8 @@
 			"StringDef": "String is a variable type that is used to store a sequence of characters or numbers\n\nString s = \"Hello World!\";\n\nThis will create a String variable s that will store the value \"Hello World!\""
 		}
 		,
-		"Null": {
-			"NullDef": "Null is the default value that will be set to any uninitialized variables\n\nint y;\n\nThis will create an int variable y that will be null since it is not initialized"
+		"null": {
+			"nullDef": "Null is a special value for reference variables\n\nString s = null;\n\nThis will create an String variable s that will be null meaning that s does not point to any particular String object."
 		}
 	}
 	,
