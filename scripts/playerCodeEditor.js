@@ -406,6 +406,7 @@
       */
 
       this.editor = ace.edit(this.editorDivId);
+      window.dbgAce = this.editor;
       this.editSession = this.editor.getSession();
       this.editSession.setMode('ace/mode/java');
       this.editSession.setUseSoftTabs(true);

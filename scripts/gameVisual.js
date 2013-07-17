@@ -110,7 +110,7 @@
       _ref = config.characters;
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         set = _ref[_i];
-        tmp = new charObj(imgArray[set.imgSet], set.dir, config.grid.border + (config.grid.gridUnit * set.x), config.grid.border + (config.grid.gridUnit * set.y), set.xOff, set.yOff, set.xSize, set.ySize);
+        tmp = new charObj(imgArray[set.imgSet], set.dir, config.grid.border + (config.grid.gridUnit * set.x), config.grid.border + (config.grid.gridUnit * set.y), set.xOff, set.yOff, set.xSize, set.ySize, set.animated);
         objArray[objArray.length] = tmp;
       }
     };
@@ -118,7 +118,7 @@
     GameVisual.prototype.pushCharacter = function(config, character) {
       var tmp;
 
-      tmp = new charObj(imgArray[character.imgSet], character.dir, config.grid.border + (config.grid.gridUnit * character.x), config.grid.border + (config.grid.gridUnit * character.y), character.xOff, character.yOff, character.xSize, character.ySize);
+      tmp = new charObj(imgArray[character.imgSet], character.dir, config.grid.border + (config.grid.gridUnit * character.x), config.grid.border + (config.grid.gridUnit * character.y), character.xOff, character.yOff, character.xSize, character.ySize, character.animated);
       return objArray[objArray.length] = tmp;
     };
 
@@ -134,6 +134,10 @@
 
     GameVisual.prototype.charFace = function(char, direction) {
       objArray[char].imFace(direction);
+    };
+
+    GameVisual.prototype.charAnimate = function(char) {
+      objArray[char].toggleAnimation();
     };
 
     /*
@@ -164,7 +168,7 @@
 
 
     charObj = (function() {
-      function charObj(animarray, dir, xpos, ypos, xOff, yOff, xSize, ySize) {
+      function charObj(animarray, dir, xpos, ypos, xOff, yOff, xSize, ySize, animated) {
         this.animarray = animarray;
         this.dir = dir;
         this.xpos = xpos;
@@ -173,8 +177,11 @@
         this.yOff = yOff;
         this.xSize = xSize;
         this.ySize = ySize;
+        this.animated = animated;
+        this.antickerAdd = 0;
         this.ldir = this.dir;
         this.cstate = 4;
+        return;
       }
 
       charObj.prototype.absPos = function(xpos, ypos) {
@@ -182,11 +189,16 @@
         this.ypos = ypos;
       };
 
+      charObj.prototype.toggleAnimation = function() {
+        this.animated = !this.animated;
+        this.antickerAdd = ar;
+      };
+
       charObj.prototype.current = function(anticker) {
         var num;
 
         num = 0;
-        if ((anticker % (2 * ar)) >= ar) {
+        if (this.animated && ((anticker + this.antickerAdd) % (2 * ar)) >= ar) {
           num = 1;
         }
         num = num + (2 * this.dir);

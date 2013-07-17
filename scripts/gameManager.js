@@ -415,9 +415,17 @@
           }
         }
       }
+      if (this.protagonistDoneMoving && this.protagonist.moving) {
+        this.visual.charAnimate(this.protagonist.index);
+        this.protagonist.moving = false;
+      }
     };
 
     MapGameState.prototype.start = function() {
+      if (this.protagonist.moves.length > 0) {
+        this.visual.charAnimate(this.protagonist.index);
+        this.protagonist.moving = true;
+      }
       this.protagonistDoneMoving = false;
       this._stand(this.protagonist);
       this.startedGame = true;
