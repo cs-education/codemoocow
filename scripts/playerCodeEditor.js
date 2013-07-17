@@ -49,12 +49,10 @@
           id: 'buttons'
         });
         if ($.inArray('insertButtons', this.editorConfig.buttons) !== -1) {
-          buttonField.append('<br />');
           buttonField.append(jQuery('<div>', {
             id: 'insertButtons'
           }).get(0));
         }
-        buttonField.append('<br />');
         editorDiv.append(buttonField.get(0));
       }
       editorDiv.append('<div id="parameter-pop-up" class="pop-up-container"></div>');
@@ -98,7 +96,7 @@
         "id": "acelne"
       });
       $(this.acelne).css({
-        "z-index": -1
+        "display": "none"
       });
       $('body').append(this.acelne);
       this.setUpInsertButtons();
@@ -243,7 +241,8 @@
         "right": aglpl,
         "bottom": aglh,
         "top": "" + offset.top + "px",
-        "left": "" + offset.left + "px"
+        "left": "" + offset.left + "px",
+        "display": "block"
       });
     };
 

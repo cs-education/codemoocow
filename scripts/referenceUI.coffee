@@ -8,8 +8,11 @@ dictionary item that is clicked in the list.
 window.dictionary = (text,cont) ->
     #appends a div for the paragraph content, to be further developed to contain code snippets and videos
     info = document.createElement("div")
-    $(info).css({"width":"100%","height":"35%","position":"absolute","top":"65%","border-top":"1px solid black"})
+    list = document.createElement("div")
+    $(info).css({"overflow":"auto","white-space": "pre-wrap", "width":"100%","height":"65%","position":"absolute","top":"35%","border-top":"1px solid black"})
+    $(list).css({"overflow":"auto","white-space": "pre-wrap", "width":"100%","height":"35%","position":"absolute","top":"0%",})
     $(cont).append(info)
+    $(cont).append(list)
     #the attache function accepts a key and data and creates the content for the info div
     attache = (k,d) ->
         info.innerHTML = d
@@ -33,7 +36,7 @@ window.dictionary = (text,cont) ->
                 $(ar).attr({"src":"img/listarrow1.png"})
                 $(ar).css({"position":"relative","left":"0","top":"0"})
                 $(npa).css({"margin":"4px 0 0 20px"})
-                if tcont != cont
+                if tcont != list
                     $(npa).css({"display":"none"})
                 else
                     $(npa).css({"margin-left":"0"})
@@ -47,7 +50,7 @@ window.dictionary = (text,cont) ->
                 delve data,npa
         return
 
-    $.getJSON(text, (data) -> delve data,cont)
+    $.getJSON(text, (data) -> delve data,list)
 ###
 InitFloat builds the floating div and appropriates its space for the java virtual console and the dictionary.  It also attaches several enlargement functions
 that allow each appropriate div to fullscreen and then shrink back
@@ -134,7 +137,7 @@ window.InitFloat = ->
     $(".en").click(enClick)
     $("#bF").click(closeClick)
 
-    window.dictionary("config/dictionary.json",dictionary)
+    window.dictionary("dictionary.json",dictionary)
 
     setUpJavaSandbox input, output
     return

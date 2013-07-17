@@ -47,16 +47,14 @@
         'class': 'code_editor'
       });
       $(editdiv).css({
-        width: '30%',
+        width: '50%',
         height: '80%',
         'position': 'absolute',
         'top': '10%',
-        'left': '32.5%',
-        "background-color": "#003366",
-        "border": "2px double rgb(204, 153, 51)"
+        'left': '15%',
+        "background-color": "#366CA3",
+        "border": "4px double #3F80C0"
       });
-      $(editdiv).append('<img style="position:absolute;bottom:0%;right:80%;" alt="Play Button" title="Play" id="compileAndRun" src="/img/freeware/button_play_green-48px.png"/>');
-      $(editdiv).append('<img style="position:absolute;bottom:0%;right:20%;" alt="Reset Button" title="Reset code" id="resetState" src="/img/cc-bynd/undo_yellow-48px.png"/>');
       this.gameDiv.append(editdiv);
       $(vis).attr({
         'id': this.visualDiv
@@ -66,23 +64,25 @@
         height: '80%',
         'position': 'absolute',
         'top': '10%',
-        'left': '65%',
-        "background-color": "#003366",
-        "border": "2px double rgb(204, 153, 51)"
+        'left': '67.5%',
+        "background-color": "#366CA3",
+        "border": "4px double #3F80C0"
       });
       this.gameDiv.append(vis);
       $(butdiv).css({
-        width: '20%',
+        width: '10%',
         height: '80%',
         'position': 'absolute',
         'top': '10%',
         'left': '2.5%',
-        "background-color": "#003366",
-        "border": "2px double rgb(204, 153, 51)"
+        "background-color": "#366CA3",
+        "border": "4px double #3F80C0"
       });
-      $(butdiv).append('<img alt="Java reference" title="Open Java Book" id="refOpen" style="width:30%;height:20%;position:absolute;top:15%;left:40%" src="/img/cc0/Spiral_bound_book-128px.png"/>');
-      $(butdiv).append('<img alt="Select Level Button" title="Select Game" id="gmOp" style="width:30%;height:20%;position:absolute;top:40%;left:40%" src="/img/cc0/treasuremap-128px.png">');
-      $(butdiv).append('<img alt="About" id="about" title="About" style="width:30%;height:20%;position:absolute;top:65%;left:40%" src="/img/freeware/info-48px.png"/>');
+      $(butdiv).append('<img alt="Java reference" id="refOpen" style=";width:30%;height:15%;position:absolute;top:45%;left:10%;" src="/img/cc0/Spiral_bound_book-128px.png"/>');
+      $(butdiv).append('<img alt="Select level" id="gmOp" style="width:30%;height:15%;position:absolute;top:25%;left:10%" src="/img/cc0/treasuremap-128px.png">');
+      $(butdiv).append('<img alt="About" id="about" style="width:30%;height:15%;position:absolute;top:25%;left:56%" src="/img/freeware/info-48px.png"/>');
+      $(butdiv).append('<img style="width:30%;height:15%;position:absolute;top:5%;left:10%" alt="Play" id="compileAndRun" src="/img/freeware/button_play_green-48px.png"/>');
+      $(butdiv).append('<img style="width:30%;height:15%;position:absolute;top:5%;left:56%" alt="Reset" id="resetState" src="/img/cc-bynd/undo_yellow-48px.png"/>');
       this.gameDiv.append(butdiv);
       this.codeEditor = new EditorManager(this.editorDiv, this.config.editor, this.config.code);
       this.interpreter = new CodeInterpreter(this.config.editor.commands);

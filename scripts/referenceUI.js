@@ -12,17 +12,29 @@
 
 
   window.dictionary = function(text, cont) {
-    var attache, delve, info, showChildren;
+    var attache, delve, info, list, showChildren;
 
     info = document.createElement("div");
+    list = document.createElement("div");
     $(info).css({
+      "overflow": "auto",
+      "white-space": "pre-wrap",
+      "width": "100%",
+      "height": "65%",
+      "position": "absolute",
+      "top": "35%",
+      "border-top": "1px solid black"
+    });
+    $(list).css({
+      "overflow": "auto",
+      "white-space": "pre-wrap",
       "width": "100%",
       "height": "35%",
       "position": "absolute",
-      "top": "65%",
-      "border-top": "1px solid black"
+      "top": "0%"
     });
     $(cont).append(info);
+    $(cont).append(list);
     attache = function(k, d) {
       info.innerHTML = d;
     };
@@ -67,7 +79,7 @@
           $(npa).css({
             "margin": "4px 0 0 20px"
           });
-          if (tcont !== cont) {
+          if (tcont !== list) {
             $(npa).css({
               "display": "none"
             });
@@ -94,7 +106,7 @@
       }
     };
     return $.getJSON(text, function(data) {
-      return delve(data, cont);
+      return delve(data, list);
     });
   };
 
@@ -261,7 +273,7 @@
     $(".en").hover(enHover, lvHover);
     $(".en").click(enClick);
     $("#bF").click(closeClick);
-    window.dictionary("config/dictionary.json", dictionary);
+    window.dictionary("dictionary.json", dictionary);
     setUpJavaSandbox(input, output);
   };
 

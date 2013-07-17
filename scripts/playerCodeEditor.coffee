@@ -26,10 +26,8 @@ class window.EditorManager
         if @editorConfig.buttons.length != 0
             buttonField = jQuery '<div>', {id: 'buttons'}
             if $.inArray('insertButtons', @editorConfig.buttons) != -1
-                buttonField.append '<br />'
                 buttonField.append jQuery('<div>', {
                     id: 'insertButtons'}).get(0)
-            buttonField.append '<br />'
             editorDiv.append buttonField.get 0
 
         editorDiv.append '<div id="parameter-pop-up" class="pop-up-container"></div>'
@@ -65,7 +63,7 @@ class window.EditorManager
         $(@acelne).append(u)
         $(@acelne).append(d)
         $(@acelne).attr({"id":"acelne"})
-        $(@acelne).css({"z-index": -1})
+        $(@acelne).css({"display": "none"})
         $('body').append @acelne
 
         @setUpInsertButtons()
@@ -185,7 +183,7 @@ class window.EditorManager
             {"width":aglw,"height":aglh,"z-index": 20,
             "background-color":"white","position":"absolute",
             "right":aglpl,"bottom":aglh,"top":"#{offset.top}px",
-            "left":"#{offset.left}px"})
+            "left":"#{offset.left}px","display": "block"})
         return
 
     onEditorCursorMove: (cursorEvent) =>
