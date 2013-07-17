@@ -24,6 +24,7 @@
       this.onStudentCodeChange = __bind(this.onStudentCodeChange, this);
       this.resetEditor = __bind(this.resetEditor, this);
       this.acelne = null;
+      this.poffset = 0;
       this.onStudentCodeChangeCallback = null;
       this.commands = this.editorConfig.commands;
       this.setUpEditor();
@@ -40,7 +41,7 @@
           the player code editor.
       */
 
-      var buttonField, d, editorDiv, u, x;
+      var buttonField, d, editorDiv, soffset, u, x;
 
       editorDiv = jQuery("#" + this.editorDivId);
       editorDiv.append('<div id="ace-editor"></div>');
@@ -89,8 +90,8 @@
         "src": "" + this.switchDownImg,
         "class": "ace_downarrow"
       });
-      $(this.acelne).append(x);
       $(this.acelne).append(u);
+      $(this.acelne).append(x);
       $(this.acelne).append(d);
       $(this.acelne).attr({
         "id": "acelne"
@@ -99,6 +100,18 @@
         "display": "none"
       });
       $('body').append(this.acelne);
+      soffset = function() {
+        var t;
+
+        t = $("#acelne").position().top - $(".ace_scrollbar").scrollTop() + this.poffset;
+        $("#acelne").css({
+          "top": t + "px"
+        });
+        return this.poffset = $(".ace_scrollbar").scrollTop();
+      };
+      $(".ace_scrollbar").scroll(function() {
+        return soffset();
+      });
       this.setUpInsertButtons();
       this.addEventListeners();
       return this.onStudentCodeChange();
@@ -227,23 +240,21 @@
       var aglh, aglpl, aglw, offset, row;
 
       row = this.editor.editor.getCursorPosition().row;
-      offset = $('.ace_gutter-layer').children().eq(row).position();
-      $('.ace_gutter').append(this.acelne);
+      $('.ace_editor').append(this.acelne);
       aglw = $('.ace_gutter-layer').width();
       aglh = $('.ace_gutter-cell').height();
       aglpl = $('.ace_gutter-cell').css("padding-left");
+      offset = aglh * row;
       $(this.acelne).css({
-        "width": aglw,
-        "height": aglh,
+        "width": "15px",
+        "max-height": aglh * 2.6,
         "z-index": 20,
-        "background-color": "white",
-        "position": "absolute",
-        "right": aglpl,
-        "bottom": aglh,
-        "top": "" + offset.top + "px",
-        "left": "" + offset.left + "px",
+        "position": "relative",
+        "top": offset - 12 - $(".ace_scrollbar").scrollTop() + "px",
+        "left": "32px",
         "display": "block"
       });
+      this.poffset = $(".ace_scrollbar").scrollTop();
     };
 
     EditorManager.prototype.onEditorCursorMove = function(cursorEvent) {
