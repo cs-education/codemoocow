@@ -316,7 +316,8 @@
 
     if (gameData.code.comments) {
       one = '// ' + ((gameData.code.comments.join('\n')).replace(/\n/g, '\n// '));
-      return gameData.code.initial = one + '\n' + gameData.code.initial;
+      gameData.code.prefix = one + '\n';
+      gameData.code.show = true;
     }
   };
 

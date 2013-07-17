@@ -61,6 +61,7 @@
       _ref = this.commandStack;
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         commandCard = _ref[_i];
+        commandCard.parameters.push(commandCard.line);
         commandMap[commandCard.command].apply(commandMap, commandCard.parameters);
       }
       commandMap.finishedParsingStartGame();
@@ -80,7 +81,7 @@
       for (command in this.commands) {
         this.usesRemaining[command] = this.commands[command]['maxUses'];
       }
-      currentLine = 0;
+      currentLine = 1;
       while (text !== "") {
         result = null;
         for (command in this.commands) {
@@ -90,7 +91,8 @@
             parameters = this.processCommand(command, result[1]);
             this.commandStack.push({
               command: command,
-              parameters: parameters
+              parameters: parameters,
+              line: currentLine
             });
             break;
           }

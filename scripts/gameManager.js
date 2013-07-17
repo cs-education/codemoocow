@@ -354,6 +354,9 @@
       }
       if (character.moves.length > 0) {
         command = character.moves.splice(0, 1)[0];
+        if (command.line != null) {
+          this.gameManager.codeEditor.editorGoToLine(command.line);
+        }
         result = command.exec();
         if (character.AI != null) {
           if (!result.success) {
@@ -447,7 +450,7 @@
       });
     };
 
-    MapGameState.prototype.move = function(steps, character) {
+    MapGameState.prototype.move = function(character, steps, line) {
       var i, _i;
 
       if (character == null) {
@@ -466,7 +469,8 @@
             success: success,
             continueExecution: false
           };
-        }).bind(this, character)
+        }).bind(this, character),
+        line: line
       });
       for (i = _i = 1; _i < steps; i = _i += 1) {
         this._moving(character);
@@ -548,7 +552,7 @@
       return false;
     };
 
-    MapGameState.prototype.turn = function(direction, character) {
+    MapGameState.prototype.turn = function(character, direction, line) {
       if (character == null) {
         character = this.protagonist;
       }
@@ -560,17 +564,18 @@
         exec: (function(dir, char) {
           var continueExec;
 
-          continueExec = this._turn(dir, char);
+          continueExec = this._turn(char, dir);
           return {
             success: true,
             continueExecution: continueExec
           };
-        }).bind(this, direction, character)
+        }).bind(this, direction, character),
+        line: line
       });
       this._stand(character);
     };
 
-    MapGameState.prototype.turnRight = function(character) {
+    MapGameState.prototype.turnRight = function(character, line) {
       if (character == null) {
         character = this.protagonist;
       }
@@ -582,17 +587,18 @@
         exec: (function(char) {
           var continueExec;
 
-          continueExec = this._turn((char.dir + 1) % 4, char);
+          continueExec = this._turn(char, (char.dir + 1) % 4);
           return {
             success: true,
             continueExecution: continueExec
           };
-        }).bind(this, character)
+        }).bind(this, character),
+        line: line
       });
       this._stand(character);
     };
 
-    MapGameState.prototype.turnLeft = function(character) {
+    MapGameState.prototype.turnLeft = function(character, line) {
       if (character == null) {
         character = this.protagonist;
       }
@@ -604,17 +610,18 @@
         exec: (function(char) {
           var continueExec;
 
-          continueExec = this._turn((char.dir + 3) % 4, char);
+          continueExec = this._turn(char, (char.dir + 3) % 4);
           return {
             success: true,
             continueExecution: continueExec
           };
-        }).bind(this, character)
+        }).bind(this, character),
+        line: line
       });
       this._stand(character);
     };
 
-    MapGameState.prototype._turn = function(direction, character) {
+    MapGameState.prototype._turn = function(character, direction) {
       if (character == null) {
         character = this.protagonist;
       }
@@ -709,14 +716,18 @@
       this.gameState.start();
     };
 
-    MapGameCommands.prototype.go = function(steps) {
+    MapGameCommands.prototype.go = function(steps, line) {
       if (steps === void 0) {
         steps = 1;
       }
-      return this.gameState.move(steps);
+      if (line === void 0) {
+        line = steps;
+        steps = 1;
+      }
+      return this.gameState.move(this.gameState.protagonist, steps, line);
     };
 
-    MapGameCommands.prototype.turn = function(dir) {
+    MapGameCommands.prototype.turn = function(dir, line) {
       var d;
 
       if (dir === void 0) {
@@ -724,56 +735,56 @@
       }
       d = $.inArray(dir, ['N', 'E', 'S', 'W']);
       if (d >= 0) {
-        this.gameState.turn(d);
+        this.gameState.turn(this.gameState.protagonist, d, line);
       } else {
         d = $.inArray(dir, ['North', 'East', 'South', 'West']);
         if (d >= 0) {
-          this.gameState.turn(d);
+          this.gameState.turn(this.gameState.protagonist, d, line);
         } else if (!isNaN(d)) {
-          this.gameState.turn((4 + dir % 4) % 4);
+          this.gameState.turn(this.gameState.protagonist, (4 + dir % 4) % 4, line);
         }
       }
     };
 
-    MapGameCommands.prototype.turnRight = function() {
-      this.gameState.turnRight();
+    MapGameCommands.prototype.turnRight = function(line) {
+      this.gameState.turnRight(this.gameState.protagonist, line);
     };
 
-    MapGameCommands.prototype.turnLeft = function() {
-      this.gameState.turnLeft();
+    MapGameCommands.prototype.turnLeft = function(line) {
+      this.gameState.turnLeft(this.gameState.protagonist, line);
     };
 
-    MapGameCommands.prototype.turnAndGo = function(direction, steps) {
-      this.turn(direction);
-      this.go(steps);
+    MapGameCommands.prototype.turnAndGo = function(direction, steps, line) {
+      this.turn(direction, line);
+      this.go(steps, line);
     };
 
-    MapGameCommands.prototype.goNorth = function(steps) {
+    MapGameCommands.prototype.goNorth = function(steps, line) {
       return this.turnAndGo(0, steps);
     };
 
-    MapGameCommands.prototype.goEast = function(steps) {
+    MapGameCommands.prototype.goEast = function(steps, line) {
       return this.turnAndGo(1, steps);
     };
 
-    MapGameCommands.prototype.goSouth = function(steps) {
+    MapGameCommands.prototype.goSouth = function(steps, line) {
       return this.turnAndGo(2, steps);
     };
 
-    MapGameCommands.prototype.goWest = function(steps) {
+    MapGameCommands.prototype.goWest = function(steps, line) {
       return this.turnAndGo(3, steps);
     };
 
-    MapGameCommands.prototype.mysteryA = function() {
-      return this.goEast(4);
+    MapGameCommands.prototype.mysteryA = function(line) {
+      return this.goEast(4, line);
     };
 
-    MapGameCommands.prototype.mysteryB = function() {
-      return this.goSouth(1);
+    MapGameCommands.prototype.mysteryB = function(line) {
+      return this.goSouth(1, line);
     };
 
-    MapGameCommands.prototype.mysteryC = function() {
-      return this.goWest(2);
+    MapGameCommands.prototype.mysteryC = function(line) {
+      return this.goWest(2, line);
     };
 
     return MapGameCommands;

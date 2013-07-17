@@ -41,7 +41,8 @@
           the player code editor.
       */
 
-      var buttonField, d, editorDiv, soffset, u, x;
+      var buttonField, d, editorDiv, u, x,
+        _this = this;
 
       editorDiv = jQuery("#" + this.editorDivId);
       editorDiv.append('<div id="ace-editor"></div>');
@@ -97,24 +98,16 @@
         "id": "acelne"
       });
       $(this.acelne).css({
-        "display": "none"
+        "display": "block"
       });
-      $('body').append(this.acelne);
-      soffset = function() {
-        var t;
-
-        t = $("#acelne").position().top - $(".ace_scrollbar").scrollTop() + this.poffset;
-        $("#acelne").css({
-          "top": t + "px"
-        });
-        return this.poffset = $(".ace_scrollbar").scrollTop();
-      };
+      $('.ace_editor').append(this.acelne);
       $(".ace_scrollbar").scroll(function() {
-        return soffset();
+        return _this.moveEditorButtons();
       });
       this.setUpInsertButtons();
       this.addEventListeners();
-      return this.onStudentCodeChange();
+      this.onStudentCodeChange();
+      setTimeout(this.moveEditorButtons, 0);
     };
 
     EditorManager.prototype.setUpInsertButtons = function() {
@@ -156,18 +149,12 @@
       ed = this.editor;
       if ($.inArray('switchUp', this.editorConfig.buttons) !== -1) {
         jQuery('.ace_uparrow').click(ed.button(ed.usesCurrentPosition(ed.switchUp)));
-      } else {
-        jQuery('.ace_uparrow').click(ed.editor.focus);
       }
       if ($.inArray('switchDown', this.editorConfig.buttons) !== -1) {
         jQuery('.ace_downarrow').click(ed.button(ed.usesCurrentPosition(ed.switchDown)));
-      } else {
-        jQuery('.ace_downarrow').click(ed.editor.focus);
       }
       if ($.inArray('deleteLine', this.editorConfig.buttons) !== -1) {
         jQuery('.ace_xbutton').click(ed.button(ed.usesTextDocument(ed.usesCurrentRow(ed.deleteLine))));
-      } else {
-        jQuery('.ace_xbutton').click(ed.editor.focus);
       }
       ed.onChangeListener(this.onStudentCodeChange);
       ed.onClickListener(this.onEditorClick);
@@ -237,21 +224,29 @@
     };
 
     EditorManager.prototype.moveEditorButtons = function() {
-      var aglh, aglpl, aglw, offset, row;
+      var aglh, aglw, maxrows, offset, row;
 
       row = this.editor.editor.getCursorPosition().row;
-      $('.ace_editor').append(this.acelne);
+      maxrows = this.editor.editSession.getLength();
       aglw = $('.ace_gutter-layer').width();
       aglh = $('.ace_gutter-cell').height();
-      aglpl = $('.ace_gutter-cell').css("padding-left");
       offset = aglh * row;
+      if (maxrows === row + 1) {
+        $(".ace_downarrow").css({
+          "display": "none"
+        });
+      } else {
+        $(".ace_downarrow").css({
+          "display": "block"
+        });
+      }
       $(this.acelne).css({
         "width": "15px",
         "max-height": aglh * 2.6,
         "z-index": 20,
         "position": "relative",
         "top": offset - 12 - $(".ace_scrollbar").scrollTop() + "px",
-        "left": "32px",
+        "left": aglw - 15 + "px",
         "display": "block"
       });
       this.poffset = $(".ace_scrollbar").scrollTop();
@@ -261,9 +256,7 @@
       if (this.parameterPopUp === void 0) {
         this.parameterPopUp = jQuery('#parameter-pop-up');
       }
-      if (!this.movingButtons) {
-        setTimeout(this.moveEditorButtons, 20);
-      }
+      this.moveEditorButtons();
       this.parameterPopUp.hide();
     };
 
@@ -383,6 +376,10 @@
       this.parameterPopUp.hide();
     };
 
+    EditorManager.prototype.editorGoToLine = function(row) {
+      this.editor.gotoLine(row);
+    };
+
     return EditorManager;
 
   })();
@@ -415,31 +412,46 @@
         jQuery("#" + this.editorDivId + " textarea").attr("readonly", "readonly");
       }
       if (this.wrapCode) {
-        this.codeText = this.codePrefix + codeText + '\n' + this.codeSuffix;
+        if (this.codePrefix !== "") {
+          this.codeText = this.codePrefix + codeText;
+        }
+        if (this.codeSuffix !== "") {
+          this.codeText += '\n' + this.codeSuffix;
+        }
       } else {
         this.codePrefix = "";
         this.codeSuffix = "";
         this.codeText = codeText;
       }
-      this.codePrefixLength = codePrefix.split('\n').length - 1;
-      this.codeSuffixLength = codeSuffix.split('\n').length - 1;
+      this.codePrefixLength = this.codePrefix.split('\n').length - 1;
+      this.codeSuffixLength = this.codeSuffix.split('\n').length - 1;
       this.enableKeyboardShortcuts();
       this.resetState();
       this.onChangeCallback = null;
       this.editor.on('change', this.onChange);
       this.editor.focus();
+      this.gotoLine(this.codePrefixLength + 1);
     }
 
     PlayerCodeEditor.prototype.getStudentCode = function() {
       return this.editor.getValue();
     };
 
-    PlayerCodeEditor.prototype.enableKeyboardShortcuts = function() {
-      /*
-          Not currently enabled as it would be difficult to prevent
-          keyboard shortcuts from changing uneditable areas.
-      */
+    PlayerCodeEditor.prototype.gotoLine = function(row) {
+      var column;
 
+      column = this.editor.getCursorPosition().column;
+      this.editor.gotoLine(row, column, true);
+    };
+
+    PlayerCodeEditor.prototype.enableKeyboardShortcuts = function() {
+      this.editor.commands.commands.movelinesup['readOnly'] = true;
+      this.editor.commands.commands.movelinesdown['readOnly'] = true;
+    };
+
+    PlayerCodeEditor.prototype.disableKeyboardShorcuts = function() {
+      this.editor.commands.commands.movelinesup['readOnly'] = false;
+      this.editor.commands.commands.movelinesdown['readOnly'] = false;
     };
 
     PlayerCodeEditor.prototype.onChangeListener = function(onChangeCallback) {
