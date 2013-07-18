@@ -35,7 +35,7 @@
   root.reference = function() {};
 
   root.drawGameMap = function(player) {
-    var addGameToMap, descriptions, game, gameSequence, mapDiv, sel, _i, _len;
+    var addGameToMap, descriptions, game, gameSequence, mapDiv, sel, tmp1, _i, _len;
 
     descriptions = root.getGameDescriptions();
     mapDiv = $(root.UIcont);
@@ -49,6 +49,9 @@
       game = gameSequence[_i];
       addGameToMap(game);
     }
+    tmp1 = document.getElementById("gameSelection");
+    $('<span style="font-size:200%">Choose your Java Game</span><br>').prependTo(tmp1);
+    $('<img src="/img/cc0/treasuremap-128px.png">').prependTo(tmp1);
     $('#gameSelection').animate({
       scrollTop: root.gameSelectionScrollPosition
     }, 0);
@@ -316,8 +319,7 @@
 
     if (gameData.code.comments) {
       one = '// ' + ((gameData.code.comments.join('\n')).replace(/\n/g, '\n// '));
-      gameData.code.prefix = one + '\n';
-      gameData.code.show = true;
+      gameData.code.initial = one + '\n' + gameData.code.initial;
     }
   };
 

@@ -1,5 +1,5 @@
-3dbf506 Set minimum size of run /abort buttons
-d8cdd3d Fix current line and tweak button vertical position to be centered
-7745707 Add git log and date time to published website
-f9a6ab8 Ignore single and multi line comments, closes #14
-376f507 Pressing reset now moves cursor to first line of code instead of first line of comments
+63b4a86 Allow comments to be edited
+beb1a79 Merge branch 'master' of github.com:angrave/javaplayland
+ef89fb1 Fixed currentLine logic
+f9322e6 Added map icon to Game Selection screen
+2cb4714 new arrows
