@@ -303,7 +303,8 @@
       src: '/img/freeware/button_play_green-48px.png',
       css: {
         'max-height': '19%',
-        'display': 'block'
+        'display': 'block',
+        'min-height': '24px'
       },
       alt: 'Run Button',
       title: 'Run the program',
@@ -329,7 +330,8 @@
       src: '/img/freeware/button_stop_red-48px.png',
       css: {
         'max-height': '19%',
-        'display': 'block'
+        'display': 'block',
+        'min-height': '24px'
       },
       alt: 'Abort Button',
       title: 'Stop the currently running program',

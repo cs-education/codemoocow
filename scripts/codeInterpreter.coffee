@@ -64,25 +64,33 @@ class window.CodeInterpreter
                     }
                     break
 
+            # Remove whitespace
             if result == null
                 result = /^\s+/.exec text
-                if result != null
-                    if result[0].indexOf('\n') != -1
-                        currentLine++
-
+    
+            # Recognize a semicolon
             if result == null
                 result = /^;/.exec text
 
+            # Ignore single comments
             if result == null
-                # We do not recognize this line, ignore it.
-                result = /^.*\n/.exec text
-                if result != null
-                    currentLine++
+                result = /^\/\/.*(?:\n || $)/.exec text
+
+            # Ignore Mult-Line comments
+            if result == null
+                result = /^\/\*(.*\n)*\*\//.exec text
+
+            # We do not recognize this line, ignore it.
+            if result == null
+                result = /^.*(?:\n || $)/.exec text
 
             if result == null
                 # None of our regexes returned, eat the first character and continue
+                if(text.charAt(0)=='\n') 
+                    currentLine++
                 text = text.substring 1
             else
+                currentLine += result[0].replace(/[^\n]+/g,"").length;
                 text = text.substring result[0].length
         return @usesRemaining
 

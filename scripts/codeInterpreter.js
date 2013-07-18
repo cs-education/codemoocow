@@ -99,24 +99,26 @@
         }
         if (result === null) {
           result = /^\s+/.exec(text);
-          if (result !== null) {
-            if (result[0].indexOf('\n') !== -1) {
-              currentLine++;
-            }
-          }
         }
         if (result === null) {
           result = /^;/.exec(text);
         }
         if (result === null) {
-          result = /^.*\n/.exec(text);
-          if (result !== null) {
-            currentLine++;
-          }
+          result = /^\/\/.*(?:\n || $)/.exec(text);
         }
         if (result === null) {
+          result = /^\/\*(.*\n)*\*\//.exec(text);
+        }
+        if (result === null) {
+          result = /^.*(?:\n || $)/.exec(text);
+        }
+        if (result === null) {
+          if (text.charAt(0) === '\n') {
+            currentLine++;
+          }
           text = text.substring(1);
         } else {
+          currentLine += result[0].replace(/[^\n]+/g, "").length;
           text = text.substring(result[0].length);
         }
       }

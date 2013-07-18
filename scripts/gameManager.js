@@ -89,6 +89,7 @@
       this.environment.visualMaster.container.id = this.visualDiv;
       this.visual = new GameVisual(this.environment.visualMaster, this.environment.frameRate);
       this.interpretGameConfigMap();
+      this.codeEditor.editor.editor.focus();
       this.addEventListeners();
     };
 

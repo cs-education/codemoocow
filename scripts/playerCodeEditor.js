@@ -107,7 +107,8 @@
       this.setUpInsertButtons();
       this.addEventListeners();
       this.onStudentCodeChange();
-      setTimeout(this.moveEditorButtons, 0);
+      this.moveEditorButtonDelay = 30;
+      setTimeout(this.moveEditorButtons, this.moveEditorButtonDelay);
     };
 
     EditorManager.prototype.setUpInsertButtons = function() {
@@ -144,7 +145,8 @@
     };
 
     EditorManager.prototype.addEventListeners = function() {
-      var ed;
+      var addOurResize, ed, normalResize, updateMove,
+        _this = this;
 
       ed = this.editor;
       if ($.inArray('switchUp', this.editorConfig.buttons) !== -1) {
@@ -159,6 +161,16 @@
       ed.onChangeListener(this.onStudentCodeChange);
       ed.onClickListener(this.onEditorClick);
       ed.onCursorMoveListener(this.onEditorCursorMove);
+      updateMove = function() {
+        setTimeout(_this.moveEditorButtons, _this.moveEditorButtonDelay);
+      };
+      ed.editSession.on('changeScrollTop', updateMove);
+      normalResize = ed.editor.renderer.onResize.bind(ed.editor.renderer);
+      addOurResize = function(force, gutterWidth, width, height) {
+        normalResize(force, gutterWidth, width, height);
+        updateMove();
+      };
+      ed.editor.renderer.onResize = addOurResize;
     };
 
     EditorManager.prototype.resetEditor = function() {
@@ -224,13 +236,13 @@
     };
 
     EditorManager.prototype.moveEditorButtons = function() {
-      var aglh, aglw, maxrows, offset, row;
+      var aalt, aglh, aglw, maxrows, row;
 
       row = this.editor.editor.getCursorPosition().row;
       maxrows = this.editor.editSession.getLength();
       aglw = $('.ace_gutter-layer').width();
       aglh = $('.ace_gutter-cell').height();
-      offset = aglh * row;
+      aalt = $('.ace_gutter-active-line').position().top;
       if (maxrows === row + 1) {
         $(".ace_downarrow").css({
           "display": "none"
@@ -245,7 +257,7 @@
         "max-height": aglh * 2.6,
         "z-index": 20,
         "position": "relative",
-        "top": offset - 12 - $(".ace_scrollbar").scrollTop() + "px",
+        "top": aalt - aglh * 0.75 + "px",
         "left": aglw - 15 + "px",
         "display": "block"
       });
@@ -256,7 +268,7 @@
       if (this.parameterPopUp === void 0) {
         this.parameterPopUp = jQuery('#parameter-pop-up');
       }
-      this.moveEditorButtons();
+      setTimeout(this.moveEditorButtons, this.moveEditorButtonDelay);
       this.parameterPopUp.hide();
     };
 
@@ -429,8 +441,8 @@
       this.resetState();
       this.onChangeCallback = null;
       this.editor.on('change', this.onChange);
-      this.editor.focus();
       this.gotoLine(this.codePrefixLength + 1);
+      return;
     }
 
     PlayerCodeEditor.prototype.getStudentCode = function() {
@@ -570,8 +582,8 @@
       */
       this.editor.setValue(this.codeText);
       this.editor.clearSelection();
-      this.editor.gotoLine(0, 0, false);
       this.reIndentCode();
+      this.gotoLine(this.codePrefixLength + 1);
     };
 
     PlayerCodeEditor.prototype.reIndentCode = function() {
