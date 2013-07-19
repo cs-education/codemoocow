@@ -3,11 +3,13 @@
   var __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
   window.GameVisual = (function() {
-    var ar, charObj, cobj, drawShape, drawText, frameClock, frameLength, imgArray, ldingLyr, lyr1, lyr2, objArray, ticker;
+    var ar, charObj, cobj, drawShape, drawText, frameClock, frameLength, imgArray, ldingLyr, lyr1, lyr2, objArray, ticker, univImg;
 
     ticker = 0;
 
     imgArray = [];
+
+    univImg = [];
 
     objArray = [];
 
@@ -82,6 +84,8 @@
     GameVisual.prototype.initResources = function(config) {
       var fi, imgar, imgo, key, tmp, _i, _len;
 
+      univImg[0] = new Image();
+      univImg[0].src = "img/fallen.png";
       tmp = [];
       for (key in config) {
         imgar = config[key];
@@ -154,6 +158,10 @@
       return objArray[char].chngState(state);
     };
 
+    GameVisual.prototype.getState = function(char) {
+      return objArray[char].state();
+    };
+
     /*
     #charObj is a class representing the characters that can move around the canvas.  It keeps track of the direction the character is facing,
     #the x and y coordinate in pixels, an array of the image objects pertaining to the character, the appropriate image for different frames,
@@ -163,6 +171,7 @@
     #   < 3 4 1 >
     #       2
     #       v
+    #   5 -> Falling Animation
     #More documenation to be added when the code is more concrete and permanent
     */
 
@@ -181,6 +190,7 @@
         this.antickerAdd = 0;
         this.ldir = this.dir;
         this.cstate = 4;
+        this.fallticker = 0;
         return;
       }
 
@@ -195,15 +205,34 @@
       };
 
       charObj.prototype.current = function(anticker) {
-        var num;
+        var num, objState;
 
+        objState = [];
         num = 0;
         if (this.animated && ((anticker + this.antickerAdd) % (2 * ar)) >= ar) {
           num = 1;
         }
         num = num + (2 * this.dir);
         num = num % this.animarray.length;
-        return this.animarray[num];
+        objState[0] = this.animarray[num];
+        objState[1] = this.xSize;
+        objState[2] = this.ySize;
+        objState[3] = this.xOff;
+        objState[4] = this.yOff;
+        if (this.cstate === 5) {
+          if (this.fallticker > 20) {
+            objState[0] = univImg[0];
+          } else {
+            this.fallticker++;
+            objState[1] = this.xSize - this.fallticker;
+            objState[2] = this.ySize - this.fallticker;
+            objState[3] = this.xOff + this.fallticker / 2;
+            objState[4] = this.yOff + this.fallticker / 2;
+          }
+        } else {
+          this.fallticker = 0;
+        }
+        return objState;
       };
 
       charObj.prototype.imFace = function(dir) {
@@ -273,13 +302,13 @@
     };
 
     GameVisual.prototype.drawChar = function(frame) {
-      var img, obj, td, _i;
+      var obj, s, td, _i;
 
       td = frame.getContext('2d');
       for (_i = objArray.length - 1; _i >= 0; _i += -1) {
         obj = objArray[_i];
-        img = obj.current(this.ticker);
-        td.drawImage(img, obj.xpos + obj.xOff, obj.ypos + obj.yOff, obj.xSize, obj.ySize);
+        s = obj.current(this.ticker);
+        td.drawImage(s[0], obj.xpos + s[3], obj.ypos + s[4], s[1], s[2]);
       }
     };
 
@@ -354,3 +383,7 @@
   })();
 
 }).call(this);
+
+/*
+//@ sourceMappingURL=gameVisual.map
+*/

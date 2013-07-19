@@ -265,6 +265,7 @@
 
       this.gameManager = gameManager;
       this.stopGame = __bind(this.stopGame, this);
+      this.protagonistFalls = __bind(this.protagonistFalls, this);
       this.gameLost = __bind(this.gameLost, this);
       this.gameWon = __bind(this.gameWon, this);
       this.clock = __bind(this.clock, this);
@@ -321,8 +322,8 @@
 
       if (this.startedGame) {
         if (this.tick % 30 === 0) {
+          this.checkEvents();
           if (!this.waiting) {
-            this.checkEvents(this.protagonistDoneMoving);
             _ref = this.gameConfig.characters;
             for (name in _ref) {
               character = _ref[name];
@@ -370,10 +371,9 @@
             }
           }
         }
-      } else {
-        if (character === this.protagonist) {
-          this.protagonistDoneMoving = true;
-        }
+      }
+      if (character === this.protagonist && character.moves.length === 0) {
+        this.protagonistDoneMoving = true;
       }
       if ((character.AI != null) && character.moves.length === 0) {
         _ref1 = character.AI.normal;
@@ -398,12 +398,16 @@
       }
     };
 
-    MapGameState.prototype.checkEvents = function(protagonistDoneMoving) {
+    MapGameState.prototype.checkEvents = function() {
       var character, name, triggers, _ref;
 
+      if (this.protagonist.x < 0 || this.protagonist.x >= this.gameManager.config.visual.grid.gridX || this.protagonist.y < 0 || this.protagonist.y >= this.gameManager.config.visual.grid.gridY) {
+        this.gameLost();
+      }
       triggers = {
         "victory": this.gameWon,
-        "loss": this.gameLost
+        "loss": this.gameLost,
+        "fall": this.protagonistFalls
       };
       _ref = this.gameConfig.characters;
       for (name in _ref) {
@@ -413,7 +417,7 @@
         }
         if (this.protagonist.x === character.x && this.protagonist.y === character.y) {
           if (character.trigger != null) {
-            if (character.trigger !== "victory" || (character.trigger === "victory" && protagonistDoneMoving)) {
+            if (character.trigger !== "victory" || (character.trigger === "victory" && this.protagonistDoneMoving)) {
               triggers[character.trigger]();
             }
           }
@@ -422,6 +426,7 @@
       if (this.protagonistDoneMoving && this.protagonist.moving) {
         this.visual.charAnimate(this.protagonist.index);
         this.protagonist.moving = false;
+        this.gameLost();
       }
     };
 
@@ -523,16 +528,13 @@
     };
 
     MapGameState.prototype.checkCanMove = function(newX, newY, character) {
+      /*
+          Returns true if the character CAN'T move.
+      */
+
       var name, otherCharacter, _ref, _ref1;
 
-      if (newX < 0 || newX >= this.gameManager.config.visual.grid.gridX || newY < 0 || newY >= this.gameManager.config.visual.grid.gridY) {
-        if (character === this.protagonist) {
-          if (newX < -1 || newX >= this.gameManager.config.visual.grid.gridX + 1 || newY < -1 || newY >= this.gameManager.config.visual.grid.gridY + 1) {
-            this.gameLost();
-          } else {
-            return false;
-          }
-        }
+      if (character !== this.protagonist && (newX < 0 || newX >= this.gameManager.config.visual.grid.gridX || newY < 0 || newY >= this.gameManager.config.visual.grid.gridY)) {
         return true;
       }
       if (character.group != null) {
@@ -636,29 +638,50 @@
     };
 
     MapGameState.prototype.gameWon = function() {
+      if (!this.startedGame) {
+        return;
+      }
       clearInterval(clockHandle);
       playAudio('victory.ogg');
       this.stars += 1;
       this.score += 5;
+      this.startedGame = false;
       this.gameManager.gameWon(this.score, this.stars);
     };
 
     MapGameState.prototype.gameLost = function() {
       var character, name, _ref;
 
+      if (!this.startedGame) {
+        return;
+      }
       if (clockHandle != null) {
         clearInterval(clockHandle);
       }
       _ref = this.gameConfig.characters;
       for (name in _ref) {
         character = _ref[name];
-        this.visual.changeState(character.index, 4);
+        if (this.visual.getState(character.index) !== 5) {
+          this.visual.changeState(character.index, 4);
+        }
         character.moves = null;
       }
-      playAudio('defeat.ogg');
       this.startedGame = false;
+      playAudio('defeat.ogg');
       alert("Try again!");
       clockHandle = setInterval(this.clock, 17);
+    };
+
+    MapGameState.prototype.protagonistFalls = function() {
+      var character, name, _ref;
+
+      _ref = this.gameConfig.characters;
+      for (name in _ref) {
+        character = _ref[name];
+        character.moves = null;
+      }
+      this.visual.changeState(this.protagonist.index, 5);
+      setTimeout(this.gameLost, 400);
     };
 
     MapGameState.prototype.stopGame = function() {
@@ -761,19 +784,19 @@
     };
 
     MapGameCommands.prototype.goNorth = function(steps, line) {
-      return this.turnAndGo(0, steps);
+      return this.turnAndGo(0, steps, line);
     };
 
     MapGameCommands.prototype.goEast = function(steps, line) {
-      return this.turnAndGo(1, steps);
+      return this.turnAndGo(1, steps, line);
     };
 
     MapGameCommands.prototype.goSouth = function(steps, line) {
-      return this.turnAndGo(2, steps);
+      return this.turnAndGo(2, steps, line);
     };
 
     MapGameCommands.prototype.goWest = function(steps, line) {
-      return this.turnAndGo(3, steps);
+      return this.turnAndGo(3, steps, line);
     };
 
     MapGameCommands.prototype.mysteryA = function(line) {
@@ -793,3 +816,7 @@
   })();
 
 }).call(this);
+
+/*
+//@ sourceMappingURL=gameManager.map
+*/

@@ -60,3 +60,7 @@
   };
 
 }).call(this);
+
+/*
+//@ sourceMappingURL=cloud.map
+*/

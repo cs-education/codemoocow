@@ -17,6 +17,11 @@
       this.editorDivId = editorDivId;
       this.editorConfig = editorConfig;
       this.codeConfig = codeConfig;
+      this.onGoingTouchIndexByID = __bind(this.onGoingTouchIndexByID, this);
+      this.handleTouchCancel = __bind(this.handleTouchCancel, this);
+      this.handleTouchEnd = __bind(this.handleTouchEnd, this);
+      this.handleTouchMove = __bind(this.handleTouchMove, this);
+      this.handleTouchStart = __bind(this.handleTouchStart, this);
       this.onEditorClick = __bind(this.onEditorClick, this);
       this.onEditorCursorMove = __bind(this.onEditorCursorMove, this);
       this.moveEditorButtons = __bind(this.moveEditorButtons, this);
@@ -73,8 +78,8 @@
       } else {
         this.deleteImg = 'img/cx.png';
       }
-      this.editor = new PlayerCodeEditor('ace-editor', this.commands, this.codeConfig.initial, this.codeConfig.show, this.codeConfig.prefix, this.codeConfig.postfix, this.editorConfig.freeformEditting);
       this.interpreter = new CodeInterpreter(this.commands);
+      this.editor = new PlayerCodeEditor('ace-editor', this.commands, this.codeConfig.initial, this.codeConfig.show, this.codeConfig.prefix, this.codeConfig.postfix, this.editorConfig.freeformEditting, this.interpreter);
       this.acelne = document.createElement("div");
       x = document.createElement("img");
       $(x).attr({
@@ -171,6 +176,12 @@
         updateMove();
       };
       ed.editor.renderer.onResize = addOurResize;
+      this.ongoingTouches = [];
+      jQuery('.ace_scroller').bind("touchstart", this.handleTouchStart);
+      jQuery('.ace_scroller').bind("touchend", this.handleTouchEnd);
+      jQuery('.ace_scroller').bind("touchcancel", this.handleTouchCancel);
+      jQuery('.ace_scroller').bind("touchleave", this.handleTouchEnd);
+      jQuery('.ace_scroller').bind("touchmove", this.handleTouchMove);
     };
 
     EditorManager.prototype.resetEditor = function() {
@@ -190,11 +201,16 @@
           When the student code changes, run it through the
           interpreter to figure out commands remaining.
       */
-      if (this.scanTimer != null) {
-        window.clearTimeout(this.scanTimer);
-        this.scanTimer = null;
+      if (this.editorConfig.freeformEditting) {
+        if (this.scanTimer != null) {
+          window.clearTimeout(this.scanTimer);
+          this.scanTimer = null;
+        }
+        this.scanTimer = window.setTimeout(this.scan, 300);
+      } else {
+
       }
-      this.scanTimer = window.setTimeout(this.scan, 500);
+      this.UpdateCommandsStatus(null);
       if (this.onStudentCodeChangeCallback != null) {
         this.onStudentCodeChangeCallback(changeData);
       }
@@ -219,7 +235,11 @@
       for (command in this.commands) {
         button = buttonField.find("#" + command);
         line = this.editor.createBlankFunctionHeader(command);
-        usesRemaining = remaining[command];
+        if (remaining !== null) {
+          usesRemaining = remaining[command];
+        } else {
+          usesRemaining = this.commands[command]['usesRemaining'];
+        }
         if (usesRemaining <= 0) {
           button.attr('disabled', true);
           if (usesRemaining < 0) {
@@ -392,6 +412,68 @@
       this.editor.gotoLine(row);
     };
 
+    EditorManager.prototype.handleTouchStart = function(evt) {
+      var touch, _i, _len, _ref1;
+
+      _ref1 = evt.originalEvent.changedTouches;
+      for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
+        touch = _ref1[_i];
+        this.ongoingTouches.push(touch);
+      }
+    };
+
+    EditorManager.prototype.handleTouchMove = function(evt) {
+      var horizontalDistance, id, touch, touches, verticalDistance, _i, _len;
+
+      evt.preventDefault();
+      touches = evt.originalEvent.changedTouches;
+      for (_i = 0, _len = touches.length; _i < _len; _i++) {
+        touch = touches[_i];
+        id = this.onGoingTouchIndexByID(touch.identifier);
+        verticalDistance = this.ongoingTouches[id].pageY - touch.pageY;
+        horizontalDistance = this.ongoingTouches[id].pageX - touch.pageX;
+        this.editor.editor.renderer.scrollBy(horizontalDistance, verticalDistance);
+        this.ongoingTouches.splice(id, 1, touch);
+      }
+    };
+
+    EditorManager.prototype.handleTouchEnd = function(evt) {
+      var horizontalDistance, id, touch, touches, verticalDistance, _i, _len;
+
+      touches = evt.originalEvent.changedTouches;
+      for (_i = 0, _len = touches.length; _i < _len; _i++) {
+        touch = touches[_i];
+        id = this.onGoingTouchIndexByID(touch.identifier);
+        verticalDistance = this.ongoingTouches[id].pageY - touch.pageY;
+        horizontalDistance = this.ongoingTouches[id].pageX - touch.pageX;
+        this.editor.editor.renderer.scrollBy(horizontalDistance, verticalDistance);
+        this.ongoingTouches.splice(id, 1);
+      }
+    };
+
+    EditorManager.prototype.handleTouchCancel = function(evt) {
+      var id, touch, touches, _i, _len;
+
+      touches = evt.originalEvent.changedTouches;
+      for (_i = 0, _len = touches.length; _i < _len; _i++) {
+        touch = touches[_i];
+        id = this.onGoingTouchIndexByID(touch.identifier);
+        this.ongoingTouches.splice(id, 1);
+      }
+    };
+
+    EditorManager.prototype.onGoingTouchIndexByID = function(idToFind) {
+      var i, id, _i, _ref1;
+
+      for (i = _i = 0, _ref1 = this.ongoingTouches.length; _i < _ref1; i = _i += 1) {
+        id = this.ongoingTouches[i].identifier;
+        if (id === i) {
+          return i;
+        }
+      }
+      return -1;
+    };
+
     return EditorManager;
 
   })();
@@ -400,13 +482,14 @@
     /*
         Creates and provides functionality for an Ace editor representing player's code.
     */
-    function PlayerCodeEditor(editorDivId, commands, codeText, wrapCode, codePrefix, codeSuffix, freeEdit) {
+    function PlayerCodeEditor(editorDivId, commands, codeText, wrapCode, codePrefix, codeSuffix, freeEdit, interpreter) {
       this.editorDivId = editorDivId;
       this.commands = commands;
       this.wrapCode = wrapCode;
       this.codePrefix = codePrefix;
       this.codeSuffix = codeSuffix;
       this.freeEdit = freeEdit;
+      this.interpreter = interpreter;
       this.reIndentCode = __bind(this.reIndentCode, this);
       this.onChange = __bind(this.onChange, this);
       /*
@@ -530,7 +613,7 @@
     };
 
     PlayerCodeEditor.prototype.deleteLine = function(_arg) {
-      var currentRow, line, maxRow, text;
+      var command, currentRow, line, maxRow, text;
 
       text = _arg.text, currentRow = _arg.currentRow;
       maxRow = this.editSession.getLength();
@@ -538,6 +621,10 @@
         return;
       }
       line = text.getLine(currentRow);
+      command = this.interpreter.identifyCommand(line);
+      if (command != null) {
+        this.commands[command]['usesRemaining']++;
+      }
       if (text.getLength() === 1) {
         text.insertLines(currentRow + 1, ["\n"]);
         text.removeNewLine(currentRow);
@@ -553,6 +640,7 @@
       if (currentRow + 1 < this.codePrefixLength || currentRow + 1 >= maxRow - (this.codeSuffixLength - 1)) {
         return;
       }
+      this.commands[command]['usesRemaining']--;
       printLine = (this.createBlankFunctionHeader(command)) + ';';
       text.insertLines(currentRow + 1, [printLine]);
       if (text.getLength() === 2 && text.getLine(currentRow) === "") {
@@ -580,10 +668,19 @@
           Resets the text displayed in the editor,
           the commands used counts, and other internal variables.
       */
+
+      var command, name, _ref1;
+
       this.editor.setValue(this.codeText);
       this.editor.clearSelection();
       this.reIndentCode();
       this.gotoLine(this.codePrefixLength + 1);
+      this.editor.renderer.scrollToRow(this.codePrefixLength);
+      _ref1 = this.commands;
+      for (name in _ref1) {
+        command = _ref1[name];
+        command['usesRemaining'] = command['maxUses'];
+      }
     };
 
     PlayerCodeEditor.prototype.reIndentCode = function() {
@@ -786,3 +883,7 @@
   })();
 
 }).call(this);
+
+/*
+//@ sourceMappingURL=playerCodeEditor.map
+*/
