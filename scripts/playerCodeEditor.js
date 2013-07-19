@@ -883,7 +883,3 @@
   })();
 
 }).call(this);
-
-/*
-//@ sourceMappingURL=playerCodeEditor.map
-*/

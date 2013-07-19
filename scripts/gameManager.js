@@ -816,7 +816,3 @@
   })();
 
 }).call(this);
-
-/*
-//@ sourceMappingURL=gameManager.map
-*/

@@ -168,7 +168,3 @@
   })();
 
 }).call(this);
-
-/*
-//@ sourceMappingURL=gameSelection.map
-*/

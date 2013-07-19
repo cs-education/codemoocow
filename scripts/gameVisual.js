@@ -383,7 +383,3 @@
   })();
 
 }).call(this);
-
-/*
-//@ sourceMappingURL=gameVisual.map
-*/
