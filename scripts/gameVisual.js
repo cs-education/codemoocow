@@ -313,25 +313,30 @@
     };
 
     GameVisual.prototype.chckMv = function(config) {
-      var obj, _i, _len;
+      var mr, obj, _i, _len;
 
       for (_i = 0, _len = objArray.length; _i < _len; _i++) {
         obj = objArray[_i];
-        if (obj.state() === 0) {
+        if (obj.state() >= 6 && obj.state() <= 9) {
+          mr = 2 * config.animation.pixMoveRate;
+        } else {
+          mr = config.animation.pixMoveRate;
+        }
+        if (obj.state() === 0 || obj.state() === 6) {
           obj.imFace(0);
-          obj.ypos = obj.ypos - config.animation.pixMoveRate;
+          obj.ypos = obj.ypos - mr;
         }
-        if (obj.state() === 1) {
+        if (obj.state() === 1 || obj.state() === 7) {
           obj.imFace(1);
-          obj.xpos = obj.xpos + config.animation.pixMoveRate;
+          obj.xpos = obj.xpos + mr;
         }
-        if (obj.state() === 2) {
+        if (obj.state() === 2 || obj.state() === 8) {
           obj.imFace(2);
-          obj.ypos = obj.ypos + config.animation.pixMoveRate;
+          obj.ypos = obj.ypos + mr;
         }
-        if (obj.state() === 3) {
+        if (obj.state() === 3 || obj.state() === 9) {
           obj.imFace(3);
-          obj.xpos = obj.xpos - config.animation.pixMoveRate;
+          obj.xpos = obj.xpos - mr;
         }
       }
     };

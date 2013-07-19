@@ -114,6 +114,7 @@
       this.onStudentCodeChange();
       this.moveEditorButtonDelay = 30;
       setTimeout(this.moveEditorButtons, this.moveEditorButtonDelay);
+      this.editor.gotoLine(this.findFirstNonCommentLine(this.codeConfig.initial));
     };
 
     EditorManager.prototype.setUpInsertButtons = function() {
@@ -472,6 +473,35 @@
         }
       }
       return -1;
+    };
+
+    EditorManager.prototype.findFirstNonCommentLine = function(src) {
+      var count, countEndMLC, countStartMLC, inMLC, isSLC, line, lines, _i, _len, _ref1;
+
+      lines = src.split('\n');
+      count = 0;
+      inMLC = false;
+      _ref1 = src.split('\n');
+      for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
+        line = _ref1[_i];
+        count += 1;
+        if (line.match(/^S*$/)) {
+          continue;
+        }
+        isSLC = !!line.match(/^\s*\/\//);
+        countStartMLC = line.split('/*').length - 1;
+        countEndMLC = line.split('*/').length - 1;
+        if (inMLC) {
+          if (!isSLC) {
+            inMLC = countStartMLC > countEndMLC;
+          }
+        } else {
+          if (!isSLC && !(inMLC = countStartMLC > countEndMLC)) {
+            break;
+          }
+        }
+      }
+      return count;
     };
 
     return EditorManager;

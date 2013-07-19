@@ -456,6 +456,27 @@
       });
     };
 
+    MapGameState.prototype.jump = function(character, steps, line) {
+      if (character == null) {
+        character = this.protagonist;
+      }
+      if (character.moves.length > 0 && character.moves[character.moves.length - 1].key === 'stand') {
+        character.moves.pop();
+      }
+      return character.moves.push({
+        key: 'jumping',
+        exec: (function(char) {
+          var success;
+
+          success = this._jump(char);
+          return {
+            success: success,
+            continueExecution: false
+          };
+        }).bind(this, character)
+      });
+    };
+
     MapGameState.prototype.move = function(character, steps, line) {
       var i, _i;
 
@@ -513,6 +534,37 @@
       if (!hitEvent) {
         this.visual.changeState(character.index, character.dir);
         if (character === this.protagonist) {
+          this.leaveTrail({
+            'x': character.x,
+            'y': character.y
+          });
+        }
+        character.x = newx;
+        character.y = newy;
+        moved = true;
+      } else {
+        this.visual.changeState(character.index, 4);
+      }
+      return moved;
+    };
+
+    MapGameState.prototype._jump = function(character) {
+      var hitEvent, moved, newx, newy, xx, yy, _ref, _ref1;
+
+      if (character == null) {
+        character = this.protagonist;
+      }
+      moved = false;
+      _ref = this.computeStepInDirection(character.dir, character.x, character.y), xx = _ref[0], yy = _ref[1];
+      _ref1 = this.computeStepInDirection(character.dir, xx, yy), newx = _ref1[0], newy = _ref1[1];
+      hitEvent = this.checkCanMove(newx, newy, character);
+      if (!hitEvent) {
+        this.visual.changeState(character.index, character.dir + 6);
+        if (character === this.protagonist) {
+          this.leaveTrail({
+            xx: xx,
+            yy: yy
+          });
           this.leaveTrail({
             'x': character.x,
             'y': character.y
@@ -721,13 +773,13 @@
   MapGameCommands = (function() {
     function MapGameCommands(gameState) {
       this.gameState = gameState;
-      this.mysteryC = __bind(this.mysteryC, this);
-      this.mysteryB = __bind(this.mysteryB, this);
-      this.mysteryA = __bind(this.mysteryA, this);
+      this.mysteryMove = __bind(this.mysteryMove, this);
+      this.mysteryGo = __bind(this.mysteryGo, this);
       this.goWest = __bind(this.goWest, this);
       this.goSouth = __bind(this.goSouth, this);
       this.goEast = __bind(this.goEast, this);
       this.goNorth = __bind(this.goNorth, this);
+      this.jump = __bind(this.jump, this);
       this.turnAndGo = __bind(this.turnAndGo, this);
       this.turnLeft = __bind(this.turnLeft, this);
       this.turnRight = __bind(this.turnRight, this);
@@ -783,6 +835,10 @@
       this.go(steps, line);
     };
 
+    MapGameCommands.prototype.jump = function(line) {
+      this.gameState.jump(this.gameState.protagonist, line);
+    };
+
     MapGameCommands.prototype.goNorth = function(steps, line) {
       return this.turnAndGo(0, steps, line);
     };
@@ -799,15 +855,11 @@
       return this.turnAndGo(3, steps, line);
     };
 
-    MapGameCommands.prototype.mysteryA = function(line) {
+    MapGameCommands.prototype.mysteryGo = function(line) {
       return this.goEast(4, line);
     };
 
-    MapGameCommands.prototype.mysteryB = function(line) {
-      return this.goSouth(1, line);
-    };
-
-    MapGameCommands.prototype.mysteryC = function(line) {
+    MapGameCommands.prototype.mysteryMove = function(line) {
       return this.goWest(2, line);
     };
 

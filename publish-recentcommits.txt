@@ -1,5 +1,5 @@
-9f9aa7f Fixed comments to 3 solutions
-13ae588 Removed multi-line comment
-e844f43 Merged
-04f95d3 Protagonist loses if they don't reach the flag, walking off of grid is fixed
-a4d4311 Merge branch 'master' of https://github.com/angrave/javaplayland
+6a4d024 Merge branch 'master' of github.com:angrave/javaplayland
+92c28a3 Jump support and focus on non-comment line
+f74a01e About box text
+95f28b0 Added new Game10 (from G.A.M.E.S camp)
+4718e48 Added new Game10 (from G.A.M.E.S camp)
