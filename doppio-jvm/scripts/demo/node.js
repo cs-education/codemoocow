@@ -95,7 +95,7 @@
       return window.postMessage(messageName, "*");
     };
     handleMessage = function(event) {
-      var fn;
+      var err, fn, prop, vDebug, _i, _len;
 
       if (event.source === self && event.data === messageName) {
         if (event.stopPropagation) {
@@ -105,7 +105,18 @@
         }
         if (timeouts.length > 0) {
           fn = timeouts.shift();
-          return fn();
+          try {
+            return fn();
+          } catch (_error) {
+            err = _error;
+            vDebug = "";
+            for (_i = 0, _len = err.length; _i < _len; _i++) {
+              prop = err[_i];
+              vDebug += "property: " + prop + " value: [" + err[prop] + "]\n";
+            }
+            vDebug += "toString(): " + " value: [" + err.toString() + "]";
+            return typeof console !== "undefined" && console !== null ? console.log(vDebug) : void 0;
+          }
         }
       }
     };

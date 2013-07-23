@@ -1,5 +1,5 @@
-6a4d024 Merge branch 'master' of github.com:angrave/javaplayland
-92c28a3 Jump support and focus on non-comment line
-f74a01e About box text
-95f28b0 Added new Game10 (from G.A.M.E.S camp)
-4718e48 Added new Game10 (from G.A.M.E.S camp)
+ee4c926 Added mini JRE
+da7a8be Merge branch 'minimizeJRE-test'
+68042c9 removed vendor/classes
+53a1e15 Merge branch 'master' of github.com:angrave/javaplayland
+a04e8f3 log exception
