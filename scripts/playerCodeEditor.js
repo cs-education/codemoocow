@@ -51,6 +51,8 @@
 
       editorDiv = jQuery("#" + this.editorDivId);
       editorDiv.append('<div id="ace-editor"></div>');
+      this.acelne = document.createElement("div");
+      $(this.acelne).append('<div id="parameter-pop-up" class="pop-up-container"></div>');
       if (this.editorConfig.buttons.length !== 0) {
         buttonField = jQuery('<div>', {
           id: 'buttons'
@@ -62,7 +64,6 @@
         }
         editorDiv.append(buttonField.get(0));
       }
-      editorDiv.append('<div id="parameter-pop-up" class="pop-up-container"></div>');
       if ($.inArray('switchUp', this.editorConfig.buttons) !== -1) {
         this.switchUpImg = 'img/ua-usable.png';
       } else {
@@ -80,7 +81,6 @@
       }
       this.interpreter = new CodeInterpreter(this.commands);
       this.editor = new PlayerCodeEditor('ace-editor', this.commands, this.codeConfig.initial, this.codeConfig.show, this.codeConfig.prefix, this.codeConfig.postfix, this.editorConfig.freeformEditting, this.interpreter);
-      this.acelne = document.createElement("div");
       x = document.createElement("img");
       $(x).attr({
         "src": "" + this.deleteImg,
@@ -177,6 +177,7 @@
         updateMove();
       };
       ed.editor.renderer.onResize = addOurResize;
+      ed.editor.setShowFoldWidgets(false);
       this.ongoingTouches = [];
       jQuery('.ace_scroller').bind("touchstart", this.handleTouchStart);
       jQuery('.ace_scroller').bind("touchend", this.handleTouchEnd);
@@ -373,8 +374,8 @@
         this.parameterPopUp.append(button.get(0));
         editorOffset = jQuery('#ace-editor').position();
         gutterOffset = this.editor.editor.renderer.$gutterLayer.gutterWidth + ((_ref1 = this.editor.editor.renderer.$gutterLayer.$padding) != null ? _ref1.left : void 0);
-        this.parameterPopUp.css('top', row * 12 + editorOffset.top - 3);
-        this.parameterPopUp.css('left', rowLength * 6 + gutterOffset + editorOffset.left);
+        this.parameterPopUp.css('top', "12px");
+        this.parameterPopUp.css('left', gutterOffset + 5);
         this.parameterPopUp.show();
         setTimeout((function() {
           jQuery("#" + command + "-parameter-" + 1).focus();

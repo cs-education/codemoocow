@@ -1,5 +1,5 @@
-ee4c926 Added mini JRE
-da7a8be Merge branch 'minimizeJRE-test'
-68042c9 removed vendor/classes
-53a1e15 Merge branch 'master' of github.com:angrave/javaplayland
-a04e8f3 log exception
+62b4c3e Merge branch 'master' of https://github.com/angrave/javaplayland
+10a17e0 backdrop click remove on cloud
+a11ada6 Merge branch 'master' of github.com:angrave/javaplayland
+e453bd6 Cloud hints
+a15a09c jump animation

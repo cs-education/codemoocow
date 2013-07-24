@@ -18,6 +18,9 @@
   root.initialize = function(UIcont) {
     var player;
 
+    $('#copyrightinfo').click(function() {
+      return window.AboutPage();
+    });
     root.gameSelectionScrollPosition = 0;
     root.loadJSONConfigs();
     root.initializeDoppio();
@@ -35,15 +38,17 @@
   root.reference = function() {};
 
   root.drawGameMap = function(player) {
-    var addGameToMap, descriptions, game, gameSequence, mapDiv, sel, tmp1, _i, _len;
+    var addGameToMap, count, descriptions, game, gameSequence, mapDiv, sel, tmp1, _i, _len;
 
     descriptions = root.getGameDescriptions();
     mapDiv = $(root.UIcont);
     mapDiv.empty();
     gameSequence = root.getGameSequence();
     sel = new gameSelector(mapDiv, false);
+    count = 0;
     addGameToMap = function(game) {
-      return sel.buildDiv(game, descriptions[game], player.games[game], root.canPlay(game), codeland);
+      count = count + 1;
+      return sel.buildDiv(count, game, descriptions[game], player.games[game], root.canPlay(game), codeland);
     };
     for (_i = 0, _len = gameSequence.length; _i < _len; _i++) {
       game = gameSequence[_i];
@@ -66,8 +71,10 @@
     }
     gamediv = $(root.UIcont);
     tmp1 = document.getElementById("gameSelection");
-    root.gameSelectionScrollPosition = tmp1.scrollTop;
-    root.UIcont.removeChild(tmp1);
+    if (tmp1 !== null) {
+      root.gameSelectionScrollPosition = tmp1.scrollTop;
+      root.UIcont.removeChild(tmp1);
+    }
     description = root.getGameDescriptions()[game];
     env = {
       key: game,
@@ -127,7 +134,6 @@
     root.updatePlayer(function(p) {
       return p.games[key] = data;
     });
-    root.showMap();
   };
 
   root.showMap = function() {

@@ -86,6 +86,8 @@
 
       univImg[0] = new Image();
       univImg[0].src = "img/fallen.png";
+      univImg[1] = new Image();
+      univImg[1].src = "img/shadow.png";
       tmp = [];
       for (key in config) {
         imgar = config[key];
@@ -191,8 +193,28 @@
         this.ldir = this.dir;
         this.cstate = 4;
         this.fallticker = 0;
+        this.juheight = 0;
+        this.crest = false;
         return;
       }
+
+      charObj.prototype.jHeight = function() {
+        if (this.crest === false) {
+          if (this.juheight === 15) {
+            this.crest = true;
+            return 15;
+          }
+          this.juheight++;
+        } else {
+          this.juheight--;
+        }
+        if (this.juheight === 1 && this.crest === true) {
+          this.juheight = 0;
+          this.crest === false;
+          return 1;
+        }
+        return this.juheight;
+      };
 
       charObj.prototype.absPos = function(xpos, ypos) {
         this.xpos = xpos;
@@ -308,7 +330,12 @@
       for (_i = objArray.length - 1; _i >= 0; _i += -1) {
         obj = objArray[_i];
         s = obj.current(this.ticker);
-        td.drawImage(s[0], obj.xpos + s[3], obj.ypos + s[4], s[1], s[2]);
+        if (obj.state() >= 6 && obj.state() <= 9) {
+          td.drawImage(univImg[1], obj.xpos + s[3], obj.ypos + s[4], s[1], s[2]);
+          td.drawImage(s[0], obj.xpos + s[3], obj.ypos + s[4] - obj.jHeight(), s[1], s[2]);
+        } else {
+          td.drawImage(s[0], obj.xpos + s[3], obj.ypos + s[4], s[1], s[2]);
+        }
       }
     };
 

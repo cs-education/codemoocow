@@ -21,10 +21,12 @@
   window.GameManager = (function() {
     function GameManager(environment) {
       this.environment = environment;
+      this.helpTips = __bind(this.helpTips, this);
       this.runStudentCode = __bind(this.runStudentCode, this);
       this.reset = __bind(this.reset, this);
       this.commandsValid = __bind(this.commandsValid, this);
       this.startGame = __bind(this.startGame, this);
+      this.gameName = __bind(this.gameName, this);
       this.config = deepcopy(this.environment.description);
       this.editorDiv = 'codeEditor';
       this.visualDiv = 'gameVisual';
@@ -36,22 +38,22 @@
           Sets up everything for the game to run.
       */
 
-      var butdiv, editdiv, vis;
+      var editdiv, vis;
 
       this.gameDiv = jQuery(this.environment.gamediv);
+      this.gameDiv.empty();
       editdiv = document.createElement("div");
       vis = document.createElement("div");
-      butdiv = document.createElement("div");
       $(editdiv).attr({
         'id': this.editorDiv,
         'class': 'code_editor'
       });
       $(editdiv).css({
-        width: '50%',
+        width: '60%',
         height: '80%',
         'position': 'absolute',
         'top': '10%',
-        'left': '15%',
+        'left': '3.3%',
         "background-color": "#366CA3",
         "border": "4px double #3F80C0"
       });
@@ -64,26 +66,14 @@
         height: '80%',
         'position': 'absolute',
         'top': '10%',
-        'left': '67.5%',
+        'right': '3.3%',
         "background-color": "#366CA3",
         "border": "4px double #3F80C0"
       });
       this.gameDiv.append(vis);
-      $(butdiv).css({
-        width: '10%',
-        height: '80%',
-        'position': 'absolute',
-        'top': '10%',
-        'left': '2.5%',
-        "background-color": "#366CA3",
-        "border": "4px double #3F80C0"
-      });
-      $(butdiv).append('<img alt="Java reference" id="refOpen" style=";width:30%;height:15%;position:absolute;top:45%;left:10%;" src="/img/cc0/Spiral_bound_book-128px.png"/>');
-      $(butdiv).append('<img alt="Select level" id="gmOp" style="width:30%;height:15%;position:absolute;top:25%;left:10%" src="/img/cc0/treasuremap-128px.png">');
-      $(butdiv).append('<img alt="About" id="about" style="width:30%;height:15%;position:absolute;top:25%;left:56%" src="/img/freeware/info-48px.png"/>');
-      $(butdiv).append('<img style="width:30%;height:15%;position:absolute;top:5%;left:10%" alt="Play" id="compileAndRun" src="/img/freeware/button_play_green-48px.png"/>');
-      $(butdiv).append('<img style="width:30%;height:15%;position:absolute;top:5%;left:56%" alt="Reset" id="resetState" src="/img/cc-bynd/undo_yellow-48px.png"/>');
-      this.gameDiv.append(butdiv);
+      $(editdiv).append('<img height="15%" style="position:absolute;bottom:1%;left:1%" alt="Play" id="compileAndRun" src="/img/freeware/button_play_green-48px.png" title="Run code"/>');
+      $(editdiv).append('<img height="15%" style="position:absolute;bottom:1%;left:8%" alt="Reset" title="Restart level (reset code back to original)" id="resetState" src="/img/cc-bynd/undo_yellow-48px.png"/>');
+      $(editdiv).append('<img height="15%" style="position:absolute;bottom:1%;left:15%" alt="Help/Tips" title="Help/Tips" id="help" src="/img/freeware/info-48px.png"/>');
       this.codeEditor = new EditorManager(this.editorDiv, this.config.editor, this.config.code);
       this.interpreter = new CodeInterpreter(this.config.editor.commands);
       this.environment.visualMaster.container.id = this.visualDiv;
@@ -91,6 +81,10 @@
       this.interpretGameConfigMap();
       this.codeEditor.editor.editor.focus();
       this.addEventListeners();
+    };
+
+    GameManager.prototype.gameName = function() {
+      return this.environment.key;
     };
 
     GameManager.prototype.startGame = function(waitForCode) {
@@ -200,7 +194,6 @@
         stars: stars,
         passed: true
       });
-      this.finishGame();
     };
 
     GameManager.prototype.finishGame = function() {
@@ -219,9 +212,7 @@
     GameManager.prototype.addEventListeners = function() {
       jQuery('#compileAndRun').click(this.runStudentCode);
       jQuery('#resetState').click(this.reset);
-      jQuery('#refOpen').click(InitFloat);
-      jQuery('#gmOp').click(codeland.showMap);
-      jQuery('#about').click(AboutPage);
+      jQuery('#help').click(this.helpTips);
       this.codeEditor.onStudentCodeChangeListener(this.startGame.bind(this, false));
       this.codeEditor.onCommandValidation(this.commandsValid);
     };
@@ -249,6 +240,30 @@
       this.interpreter.scanText(this.codeEditor.getStudentCode());
       this.startGame(true);
       this.interpreter.executeCommands(this.commandMap);
+    };
+
+    GameManager.prototype.helpTips = function() {
+      var conf, ma, title, _ref, _ref1;
+
+      ma = (_ref = this.config) != null ? (_ref1 = _ref.code) != null ? _ref1.comments : void 0 : void 0;
+      if (ma) {
+        if (ma.length > 1) {
+          title = ma[0];
+          ma = ma.slice(1);
+          ma[0] = title + '<br>' + ma[0];
+        }
+        conf = {
+          widthpx: 600,
+          mesgs: ma,
+          parentTag: "body",
+          xoffset: "30%",
+          yoffset: "30%",
+          textscaling: 0.7,
+          nextgame: "none",
+          gameManager: this.gameManager
+        };
+        return window.objCloud(conf.widthpx, conf.mesgs, conf.parentTag, conf.xoffset, conf.yoffset, conf.textscaling, conf.nextgame, conf.gameManager);
+      }
     };
 
     return GameManager;
@@ -320,7 +335,7 @@
     MapGameState.prototype.clock = function() {
       var character, name, _ref, _ref1;
 
-      if (this.startedGame) {
+      if (this.startedGame === true) {
         if (this.tick % 30 === 0) {
           this.checkEvents();
           if (!this.waiting) {
@@ -690,19 +705,31 @@
     };
 
     MapGameState.prototype.gameWon = function() {
+      var gn, ma, num;
+
       if (!this.startedGame) {
         return;
       }
-      clearInterval(clockHandle);
       playAudio('victory.ogg');
       this.stars += 1;
       this.score += 5;
       this.startedGame = false;
       this.gameManager.gameWon(this.score, this.stars);
+      gn = this.gameManager.gameName();
+      num = parseInt(gn.charAt(gn.length - 1));
+      num++;
+      if (num === 12) {
+        num = 1;
+      }
+      gn = gn.slice(0, gn.length - 1);
+      gn = gn.concat(num);
+      ma = [];
+      ma[0] = "Congratulations!";
+      window.objCloud(400, ma, "body", "30%", "30%", 1.5, gn, this.gameManager);
     };
 
     MapGameState.prototype.gameLost = function() {
-      var character, name, _ref;
+      var character, ma, name, _ref;
 
       if (!this.startedGame) {
         return;
@@ -720,7 +747,9 @@
       }
       this.startedGame = false;
       playAudio('defeat.ogg');
-      alert("Try again!");
+      ma = [];
+      ma[0] = "Try Again!";
+      window.objCloud(400, ma, "body", "30%", "30%", 3, "none", this.gameManager);
       clockHandle = setInterval(this.clock, 17);
     };
 

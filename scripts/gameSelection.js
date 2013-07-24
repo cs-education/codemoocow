@@ -24,33 +24,39 @@
       return;
     }
 
-    gameSelector.prototype.buildDiv = function(game, desc, player, canPlay, codeland) {
-      var gameDiv, img, src;
+    gameSelector.prototype.buildDiv = function(count, game, desc, player, canPlay, codeland) {
+      var img, span, src;
 
-      gameDiv = document.createElement("span");
-      $(gameDiv).css({
-        "min-width": "32px",
+      span = document.createElement("span");
+      $(span).css({
+        "min-width": "450px",
         "min-height": "32px",
-        "padding": "5px"
+        "padding": "5px",
+        "display": "inline-block",
+        "white-space": "nowrap",
+        "border": "1px dashed blue",
+        "font-family": "Monospace",
+        "margin:5px": "margin:5px",
+        "cursor": "pointer"
       });
-      $(gameDiv).attr("id", "select" + game);
-      cont.append(gameDiv);
+      $(span).attr("id", "select" + game);
+      cont.append(span);
       src = '/img/stare.png';
-      if ((player != null ? player.passed : void 0) === true) {
-        src = '/img/star.png';
-      }
-      img = jQuery('<img>', {
-        id: 'star',
-        src: src,
-        style: 'max-height:32px',
-        alt: "Start Game",
-        title: desc.description
-      });
-      $(gameDiv).click(function() {
+      $(span).click(function() {
         return codeland.startGame(game);
       });
-      $(gameDiv).append(img.get(0));
-      return $(gameDiv).append(game);
+      $(span).append(count + ' ');
+      $(span).append(desc.title);
+      if ((player != null ? player.passed : void 0) === true) {
+        src = '/img/star.png';
+        img = jQuery('<img>', {
+          id: 'star',
+          src: src,
+          style: 'max-height:16px',
+          alt: "Start Game"
+        });
+        return $(span).append(img.get(0));
+      }
     };
 
     gameSelector.prototype.buildAn = function(con, canPlay) {
