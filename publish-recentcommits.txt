@@ -1,5 +1,5 @@
-62b4c3e Merge branch 'master' of https://github.com/angrave/javaplayland
-10a17e0 backdrop click remove on cloud
-a11ada6 Merge branch 'master' of github.com:angrave/javaplayland
-e453bd6 Cloud hints
-a15a09c jump animation
+ff607d7 Merge branch 'master' of github.com:angrave/javaplayland
+c15edef Go now checks for invalid parameters passed to it, fixes #29 FOR MASTER BRANCH ONLY
+2c7cbf7 fixed horizontal centering
+32a1dff style sheet
+2218745 Merge branch 'master' of github.com:angrave/javaplayland

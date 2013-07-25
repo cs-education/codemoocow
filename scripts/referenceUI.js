@@ -296,7 +296,9 @@
       msg += str;
       textOutput.text(msg);
     };
-    log = console.log;
+    log = function(mesg) {
+      return console.log(mesg);
+    };
     codeland.doppioAPI.setOutputFunctions(stdout, log);
     run = jQuery('<img>', {
       id: 'runCode',

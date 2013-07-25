@@ -71,9 +71,9 @@
         "border": "4px double #3F80C0"
       });
       this.gameDiv.append(vis);
-      $(editdiv).append('<img height="15%" style="position:absolute;bottom:1%;left:1%" alt="Play" id="compileAndRun" src="/img/freeware/button_play_green-48px.png" title="Run code"/>');
-      $(editdiv).append('<img height="15%" style="position:absolute;bottom:1%;left:8%" alt="Reset" title="Restart level (reset code back to original)" id="resetState" src="/img/cc-bynd/undo_yellow-48px.png"/>');
-      $(editdiv).append('<img height="15%" style="position:absolute;bottom:1%;left:15%" alt="Help/Tips" title="Help/Tips" id="help" src="/img/freeware/info-48px.png"/>');
+      $(editdiv).append('<img height="15%" style="position:absolute;bottom:1%;right:1%" alt="Play" id="compileAndRun" src="/img/freeware/button_play_green-48px.png" title="Run code"/>');
+      $(editdiv).append('<img height="15%" style="position:absolute;bottom:1%;right:8%" alt="Reset" title="Restart level (reset code back to original)" id="resetState" src="/img/cc-bynd/undo_yellow-48px.png"/>');
+      $(editdiv).append('<img height="15%" style="position:absolute;bottom:1%;right:15%" alt="Help/Tips" title="Help/Tips" id="help" src="/img/freeware/info-48px.png"/>');
       this.codeEditor = new EditorManager(this.editorDiv, this.config.editor, this.config.code);
       this.interpreter = new CodeInterpreter(this.config.editor.commands);
       this.environment.visualMaster.container.id = this.visualDiv;
@@ -274,6 +274,11 @@
     var clockHandle;
 
     clockHandle = null;
+
+    MapGameState.prototype.invalidParameterException = function(value) {
+      this.name = 'invalidParameterException';
+      this.value = value;
+    };
 
     function MapGameState(gameManager, waitForCode) {
       var character, command, name, _i, _len, _ref, _ref1;
@@ -493,8 +498,6 @@
     };
 
     MapGameState.prototype.move = function(character, steps, line) {
-      var i, _i;
-
       if (character == null) {
         character = this.protagonist;
       }
@@ -503,32 +506,29 @@
       }
       character.moves.push({
         key: 'startMove',
-        exec: (function(char) {
+        exec: (function(char, steps) {
           var success;
 
-          success = this._move(char);
+          success = this._move(char, steps);
           return {
             success: success,
             continueExecution: false
           };
-        }).bind(this, character),
+        }).bind(this, character, steps),
         line: line
       });
-      for (i = _i = 1; _i < steps; i = _i += 1) {
-        this._moving(character);
-      }
     };
 
     MapGameState.prototype._moving = function(character) {
       if (character == null) {
         character = this.protagonist;
       }
-      return character.moves.push({
+      return character.moves.unshift({
         key: 'moving',
         exec: (function(char) {
           var success;
 
-          success = this._move(char);
+          success = this._move(char, 1);
           return {
             success: success,
             continueExecution: false
@@ -537,11 +537,17 @@
       });
     };
 
-    MapGameState.prototype._move = function(character) {
-      var hitEvent, moved, newx, newy, _ref;
+    MapGameState.prototype._move = function(character, steps) {
+      var hitEvent, i, moved, newx, newy, _i, _ref;
 
       if (character == null) {
         character = this.protagonist;
+      }
+      if (isNaN(steps)) {
+        throw new this.invalidParameterException(steps);
+      }
+      for (i = _i = 1; _i < steps; i = _i += 1) {
+        this._moving(character);
       }
       moved = false;
       _ref = this.computeStepInDirection(character.dir, character.x, character.y), newx = _ref[0], newy = _ref[1];
@@ -825,6 +831,7 @@
       if (steps === void 0) {
         steps = 1;
       }
+      steps = parseInt(steps.toString(), 10);
       if (line === void 0) {
         line = steps;
         steps = 1;

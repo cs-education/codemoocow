@@ -11,7 +11,7 @@
   };
 
   window.objCloud = function(dim, par, obj, x, y, tscale, ng, man) {
-    var backdrop, cloud, cont, lb, ngco, ngi, ngt, ntc, nti, ntl, ntr, rb, subbd, text, tipnum, xb, xbcloud;
+    var backdrop, cloud, cont, lb, left, ngco, ngi, ngt, ntc, nti, ntl, ntr, rb, subbd, text, tipnum, xb, xbcloud;
 
     tipnum = 0;
     rb = function() {
@@ -189,7 +189,7 @@
     });
     $(text).css({
       "width": "75%",
-      "95%": "95%",
+      "height": "95%",
       "position": "absolute",
       "top": "26%",
       "left": "8%",
@@ -204,16 +204,18 @@
     $(subbd).append(xbcloud);
     $(subbd).append(xb);
     $(obj).append(cont);
+    text.innerHTML = "<p style='margin-top:auto;margin-right:auto'>" + par[0] + "</p>";
     $(text).css({
-      'font-size': (dim * .05 * tscale) + 'px',
-      "top": (dim - $(text).height) / 2 + "px",
-      "left": ($(cont).width() - $(text).width()) / 2 + "px"
+      'font-size': (dim * .05 * tscale) + 'px'
+    });
+    left = 0.125 * dim;
+    $(text).css({
+      "left": left + "px"
     });
     $(xb).click(function() {
       $(cont).remove();
       return $(backdrop).remove();
     });
-    text.innerHTML = "<p style='margin-top:auto;margin-right:auto'>" + par[0] + "</p>";
   };
 
 }).call(this);
