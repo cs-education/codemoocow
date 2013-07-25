@@ -94,7 +94,6 @@
       this.visual.startGame(this.config.visual);
       this.gameState = new MapGameState(this, waitForCode);
       this.commandMap = new MapGameCommands(this.gameState);
-      this.helpTips();
     };
 
     GameManager.prototype.interpretGameConfigMap = function() {

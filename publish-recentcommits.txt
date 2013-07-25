@@ -1,5 +1,5 @@
+0ecf95c Removing show tips from startGame()
+61b3115 Merge branch 'master' of github.com:angrave/javaplayland
+ae7a71e Merge branch 'master' of https://github.com/angrave/javaplayland
+1b93dc1 reference split jump fix
 9ae95df Merge branch 'master' of github.com:angrave/javaplayland
-1d08075 Helper script to see what version is currently available
-24f4f74 Always display help tips when game starts
-651807f Player falls when leaving grid, fixes #30 on master
-ee36b26 Fixes #29 on branch master

@@ -208,9 +208,10 @@
         } else {
           this.juheight--;
         }
+        console.log(this.juheight + ":" + this.crest);
         if (this.juheight === 1 && this.crest === true) {
           this.juheight = 0;
-          this.crest === false;
+          this.crest = false;
           return 1;
         }
         return this.juheight;
