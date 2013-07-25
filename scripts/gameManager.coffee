@@ -61,6 +61,11 @@ class window.GameManager
         @visual.startGame @config.visual
         @gameState = new MapGameState @, waitForCode
         @commandMap = new MapGameCommands @gameState
+
+#        player = @environment.player
+#        if(! player.games[@environment.key].seenTips)
+#            player.games[@environment.key].seenTips = true
+        @helpTips()
         return
 
     interpretGameConfigMap: ->
@@ -243,7 +248,10 @@ class MapGameState
                 @checkEvents()
                 if not @waiting
                     for name, character of @gameConfig.characters
-                        @runCharacterCommand character
+                        try
+                            @runCharacterCommand character
+                        catch e
+                            @gameLost()
                     @waiting = true
                 else
                     for name, character of @gameConfig.characters
@@ -291,7 +299,7 @@ class MapGameState
         # Just doing player collisions at the moment.
         if @protagonist.x < 0 or @protagonist.x >= @gameManager.config.visual.grid.gridX\
           or @protagonist.y < 0 or @protagonist.y >= @gameManager.config.visual.grid.gridY
-            @gameLost()
+            @protagonistFalls()
 
         triggers = {"victory": @gameWon, "loss": @gameLost, "fall": @protagonistFalls}
         for name, character of @gameConfig.characters

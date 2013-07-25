@@ -94,6 +94,7 @@
       this.visual.startGame(this.config.visual);
       this.gameState = new MapGameState(this, waitForCode);
       this.commandMap = new MapGameCommands(this.gameState);
+      this.helpTips();
     };
 
     GameManager.prototype.interpretGameConfigMap = function() {
@@ -338,7 +339,7 @@
     };
 
     MapGameState.prototype.clock = function() {
-      var character, name, _ref, _ref1;
+      var character, e, name, _ref, _ref1;
 
       if (this.startedGame === true) {
         if (this.tick % 30 === 0) {
@@ -347,7 +348,12 @@
             _ref = this.gameConfig.characters;
             for (name in _ref) {
               character = _ref[name];
-              this.runCharacterCommand(character);
+              try {
+                this.runCharacterCommand(character);
+              } catch (_error) {
+                e = _error;
+                this.gameLost();
+              }
             }
             this.waiting = true;
           } else {
@@ -422,7 +428,7 @@
       var character, name, triggers, _ref;
 
       if (this.protagonist.x < 0 || this.protagonist.x >= this.gameManager.config.visual.grid.gridX || this.protagonist.y < 0 || this.protagonist.y >= this.gameManager.config.visual.grid.gridY) {
-        this.gameLost();
+        this.protagonistFalls();
       }
       triggers = {
         "victory": this.gameWon,

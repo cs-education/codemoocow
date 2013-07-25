@@ -1,5 +1,5 @@
-ff607d7 Merge branch 'master' of github.com:angrave/javaplayland
-c15edef Go now checks for invalid parameters passed to it, fixes #29 FOR MASTER BRANCH ONLY
-2c7cbf7 fixed horizontal centering
-32a1dff style sheet
-2218745 Merge branch 'master' of github.com:angrave/javaplayland
+9ae95df Merge branch 'master' of github.com:angrave/javaplayland
+1d08075 Helper script to see what version is currently available
+24f4f74 Always display help tips when game starts
+651807f Player falls when leaving grid, fixes #30 on master
+ee36b26 Fixes #29 on branch master
