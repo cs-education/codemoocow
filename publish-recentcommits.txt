@@ -1,5 +1,5 @@
+f37f8cd Enable Web Analytics
 0ecf95c Removing show tips from startGame()
 61b3115 Merge branch 'master' of github.com:angrave/javaplayland
 ae7a71e Merge branch 'master' of https://github.com/angrave/javaplayland
 1b93dc1 reference split jump fix
-9ae95df Merge branch 'master' of github.com:angrave/javaplayland
