@@ -280,7 +280,7 @@
         "z-index": 20,
         "position": "relative",
         "top": aalt - aglh * 1.5 + "px",
-        "left": aglw - 15 + "px",
+        "left": 0 + "px",
         "display": "block"
       });
       this.poffset = $(".ace_scrollbar").scrollTop();
@@ -537,7 +537,7 @@
       if (!this.freeEdit) {
         jQuery("#" + this.editorDivId + " textarea").attr("readonly", "readonly");
       }
-      if (this.wrapCode) {
+      if (this.wrapCode === true) {
         if (this.codePrefix !== "") {
           this.codeText = this.codePrefix + codeText;
         }
@@ -704,6 +704,7 @@
 
       this.editor.setValue(this.codeText);
       this.editor.clearSelection();
+      this.editor.resize();
       this.reIndentCode();
       this.gotoLine(this.codePrefixLength + 1);
       this.editor.renderer.scrollToRow(this.codePrefixLength);

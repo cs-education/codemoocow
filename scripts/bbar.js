@@ -95,7 +95,7 @@
     $(ref).click(referencePage);
     $(select).click(codeland.showMap);
     $(sand).click(sandBoxPage);
-    $(edge).click(function() {
+    $(cont).children().click(function() {
       return coffeeisdumb();
     });
     return $(d).append(cont);

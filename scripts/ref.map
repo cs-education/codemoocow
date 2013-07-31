@@ -1,0 +1,10 @@
+{
+  "version": 3,
+  "file": "ref.js",
+  "sourceRoot": "..",
+  "sources": [
+    "scripts/ref.coffee"
+  ],
+  "names": [],
+  "mappings": ";AAAA;CAAA,CAAA,CAAgB,GAAV,GAAW;CAEf,EAAa,MAAd,EAAA;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;CAFe;CAAhB,EAAgB;CAAhB"
+}
