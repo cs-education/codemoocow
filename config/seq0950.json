@@ -3,6 +3,8 @@
   "description": "My awesome go method takes an integer parameter",
   "task": "",
   "tags": "intro",
+  "gameType": "grid",
+  "backEnd": "interpreter",
   "editor": {
     "freeformEditting": false,
     "buttons": [
@@ -93,8 +95,5 @@
     }
   },
   "help": [],
-  "dyk": [],
-  "depends": [
-    "game8"
-  ]
+  "dyk": []
 }

@@ -3,6 +3,8 @@
   "description": "Maze",
   "task": "",
   "tags": "intro",
+  "gameType": "grid",
+  "backEnd": "interpreter",
   "editor": {
     "freeformEditting": false,
     "buttons": [
@@ -47,8 +49,5 @@
     }
   },
   "help": [],
-  "dyk": [],
-  "depends": [
-    "game10"
-  ]
+  "dyk": []
 }

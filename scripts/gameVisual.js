@@ -36,6 +36,7 @@
 
 
     function GameVisual(config, fl) {
+      this.removeCharacter = __bind(this.removeCharacter, this);
       this.pushCharacter = __bind(this.pushCharacter, this);
       this.startGame = __bind(this.startGame, this);      frameLength = fl;
       this.initContainer(config.container.width, config.container.height, config.container.id);
@@ -82,13 +83,14 @@
 
 
     GameVisual.prototype.initResources = function(config) {
-      var fi, imgar, imgo, key, tmp, _i, _len;
+      var fi, imgar, imgo, index, key, tmp, _i, _len;
 
       univImg[0] = new Image();
       univImg[0].src = "img/fallen.png";
       univImg[1] = new Image();
       univImg[1].src = "img/shadow.png";
       tmp = [];
+      index = 0;
       for (key in config) {
         imgar = config[key];
         tmp = [];
@@ -98,7 +100,7 @@
           imgo.src = fi;
           tmp[tmp.length] = imgo;
         }
-        imgArray[imgArray.length] = tmp;
+        imgArray[index++] = tmp;
       }
     };
 
@@ -125,7 +127,25 @@
       var tmp;
 
       tmp = new charObj(imgArray[character.imgSet], character.dir, config.grid.border + (config.grid.gridUnit * character.x), config.grid.border + (config.grid.gridUnit * character.y), character.xOff, character.yOff, character.xSize, character.ySize, character.animated);
-      return objArray[objArray.length] = tmp;
+      objArray[objArray.length] = tmp;
+    };
+
+    GameVisual.prototype.removeCharacter = function(config, character) {
+      var i, index, object, _i, _len;
+
+      index = -1;
+      for (i = _i = 0, _len = objArray.length; _i < _len; i = ++_i) {
+        object = objArray[i];
+        if (object.xpos === config.grid.border + (config.grid.gridUnit * character.x) && object.ypos === config.grid.border + (config.grid.gridUnit * character.y) && object.animarray === imgArray[character.imgSet]) {
+          index = i;
+          break;
+        }
+      }
+      if (index !== -1) {
+        objArray.splice(index, 1);
+        return true;
+      }
+      return false;
     };
 
     drawText = function() {};

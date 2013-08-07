@@ -1,23 +1,26 @@
 {
-  "title": "Code reader's revenge",
-  "description": "Not hard, once it's working?",
+  "title": "Blank slate",
+  "description": "Create your own recipe",
   "task": "",
   "tags": "intro",
+  "gameType": "grid",
+  "backEnd": "interpreter",
   "editor": {
     "freeformEditting": false,
     "buttons": [
       "switchUp",
       "switchDown",
-      "deleteLine"
+      "deleteLine",
+      "insertButtons"
     ],
     "commands": {
       "go": {
         "inputs": 0,
-        "maxUses": 5
+        "maxUses": 1
       },
       "turnLeft": {
         "inputs": 0,
-        "maxUses": 3
+        "maxUses": 1
       },
       "turnRight": {
         "inputs": 0,
@@ -26,10 +29,10 @@
     }
   },
   "code": {
-    "shorthand": "gggggLLLRR",
-    "comments" : [ "Puzzle #7 - 'Code reader's revenge'","Think like a careful programmer \n - check every statement is correct!" ,
-"Re-arrange or delete these statements to win this level.",
-"Don't forgot the reset button if you need to start over."]
+    "shorthand": "",
+    "initial": "",
+	"comments" : [ "Puzzle #8 - 'Blank slate'","To solve this puzzle use the code buttons to create your own program.",
+	"Hint #1 You can use a maximum of two turnRight() statements and one turnLeft()!"]
   },
   "game": {
     "characterBase": {
@@ -37,15 +40,12 @@
         "dir": 1
       }
     },
-    "map": "F.XX\nX...\nXXP.",
+    "map": "FP",
     "offset": {
       "x": 4,
       "y": 4
     }
   },
   "help": [],
-  "dyk": [],
-  "depends": [
-    "game6"
-  ]
+  "dyk": []
 }

@@ -9,11 +9,13 @@
         Please do not call the constructor until the entire document has loaded
         (this is usually accomplished with jQuery(document).onReady)
     */
-    function DoppioApi(stdout, logIgnore, beanshellWrapperName) {
+    function DoppioApi(stdout, logIgnore) {
+      var stdin;
+
       this.stdout = stdout;
-      this.beanshellWrapperName = beanshellWrapperName;
       this.abort = __bind(this.abort, this);
       this.run = __bind(this.run, this);
+      this.output = __bind(this.output, this);
       /*
           Sets up Doppio environment.
           @stdout (msg) ->
@@ -26,13 +28,36 @@
       this.load_mini_rt();
       this.bs_cl = new ClassLoader.BootstrapClassLoader(this.read_classfile);
       jvm.set_classpath('/home/doppio/vendor/classes/', './');
-      this.rs = null;
+      stdin = function() {
+        return "\n";
+      };
+      this.rs = new runtime.RuntimeState(this.output, stdin, this.bs_cl);
+      this.running = false;
+      this.preloaded = false;
       return;
     }
 
     DoppioApi.prototype.setOutputFunctions = function(stdout, log) {
-      this.stdout = stdout;
       this.log = log;
+      if (!this.running) {
+        this.stdout = stdout;
+      } else {
+        if (typeof console !== "undefined" && console !== null) {
+          console.log('Currently running');
+        }
+        if (!this.updateOutput) {
+          if (typeof console !== "undefined" && console !== null) {
+            console.log('Will update output when finished');
+          }
+          this.updateOutput = stdout;
+        }
+      }
+    };
+
+    DoppioApi.prototype.output = function(msg) {
+      if (this.stdout != null) {
+        this.stdout(msg);
+      }
     };
 
     DoppioApi.prototype.read_classfile = function(cls, cb, failure_cb) {
@@ -74,7 +99,9 @@
         data = node.fs.readFileSync("/home/doppio/preload.tar");
       } catch (_error) {
         e = _error;
-        console.error(e);
+        if (typeof console !== "undefined" && console !== null) {
+          console.error(e);
+        }
       }
       if (data === null) {
         throw new Error("No mini-rt data");
@@ -95,55 +122,110 @@
       };
       untar(new util.BytesArray(util.bytestr_to_array(data)), writeOneFile);
       end_untar = (new Date()).getTime();
-      return typeof console !== "undefined" && console !== null ? console.log("Untarring took a total of " + (end_untar - start_untar) + "ms.") : void 0;
+      if (typeof console !== "undefined" && console !== null) {
+        console.log("Untarring took a total of " + (end_untar - start_untar) + "ms.");
+      }
     };
 
-    DoppioApi.prototype.run = function(studentCode, beanshellWrapperName, finished_cb) {
+    DoppioApi.prototype.run = function(studentCode, gameContext, finished_cb) {
       /*
           Runs the given Java Code.
-          Note, this does not recognize classes.
       */
 
-      var class_args, finish_cb, fname, start_time, stdin,
+      var class_args, finish_cb, start_time,
         _this = this;
 
-      if (this.rs !== null) {
-        if (typeof console !== "undefined" && console !== null) {
-          console.log('Already Running, not re-starting run');
+      if (this.running) {
+        if (this.preloaded) {
+          if (typeof console !== "undefined" && console !== null) {
+            console.log('Already Running, not re-starting run');
+          }
+          finished_cb(false);
+        } else {
+          if (typeof console !== "undefined" && console !== null) {
+            console.log('Not finished preloading, will run after preload finishes');
+          }
+          this.firstRun = this.run.bind(this, studentCode, gameContext, finished_cb);
         }
         return;
       }
       start_time = (new Date()).getTime();
+      if (this.rs.is_abort_requested) {
+        this.rs.abort_requested = null;
+      }
       if (typeof console !== "undefined" && console !== null) {
         console.log('Starting Run');
       }
-      fname = 'program.bsh';
-      node.fs.writeFileSync(fname, studentCode);
-      stdin = function() {
-        return "\n";
-      };
-      if (beanshellWrapperName != null) {
-        class_args = [beanshellWrapperName];
-      } else {
-        class_args = [fname];
-      }
+      class_args = [studentCode];
       finish_cb = function() {
         var end_time;
 
         end_time = (new Date()).getTime();
-        if (_this.rs !== null) {
+        if (_this.running) {
           if (typeof console !== "undefined" && console !== null) {
             console.log('Finished Run');
           }
           if (typeof console !== "undefined" && console !== null) {
             console.log("Took " + (end_time - start_time) + "ms.");
           }
-          _this.rs = null;
+          _this.running = false;
         }
-        finished_cb();
+        if (_this.updateOutput != null) {
+          _this.setOutputFunctions(_this.updateOutput, _this.log);
+          _this.updateOutput = null;
+        }
+        finished_cb(true);
       };
-      this.rs = new runtime.RuntimeState(this.stdout, stdin, this.bs_cl);
-      jvm.run_class(this.rs, 'bsh/Interpreter', class_args, finish_cb);
+      this.running = true;
+      if (gameContext) {
+        jvm.run_class(this.rs, 'codemoo/RunGame', class_args, finish_cb);
+      } else {
+        jvm.run_class(this.rs, 'codemoo/Run', class_args, finish_cb);
+      }
+    };
+
+    DoppioApi.prototype.preload = function(preloadFunctions, finished_cb) {
+      var class_args, finish_cb, start_time,
+        _this = this;
+
+      if (this.running) {
+        if (typeof console !== "undefined" && console !== null) {
+          console.log('Busy Running');
+        }
+        finished_cb(false);
+        return;
+      }
+      if (typeof console !== "undefined" && console !== null) {
+        console.log('Starting Preload');
+      }
+      class_args = [preloadFunctions];
+      finish_cb = function() {
+        var end_time;
+
+        end_time = (new Date()).getTime();
+        if (_this.running) {
+          if (typeof console !== "undefined" && console !== null) {
+            console.log('Preloading Finished');
+          }
+          if (typeof console !== "undefined" && console !== null) {
+            console.log("Took " + (end_time - start_time) + "ms.");
+          }
+          _this.running = false;
+        }
+        if (_this.updateOutput != null) {
+          _this.setOutputFunctions(_this.updateOutput, _this.log);
+          _this.updateOutput = null;
+        }
+        finished_cb(true);
+        _this.preloaded = true;
+        if (_this.firstRun) {
+          _this.firstRun();
+          _this.firstRun = null;
+        }
+      };
+      this.running = true;
+      start_time = (new Date()).getTime();
+      jvm.run_class(this.rs, 'codemoo/Preload', class_args, finish_cb);
     };
 
     DoppioApi.prototype.abort = function(finished_cb) {
@@ -151,29 +233,40 @@
           Abort the current run.
       */
 
-      var cb,
-        _this = this;
+      var cb;
 
       if (typeof console !== "undefined" && console !== null) {
         console.log('User Abort Requested');
       }
-      if (this.rs) {
-        if (typeof console !== "undefined" && console !== null) {
-          console.log('Aborting Run');
-        }
-        cb = function() {
+      if (this.running) {
+        if (this.preloaded) {
           if (typeof console !== "undefined" && console !== null) {
-            console.log('Aborted Successfully');
+            console.log('Aborting Run');
           }
-          _this.rs = null;
+          cb = function() {
+            if (typeof console !== "undefined" && console !== null) {
+              console.log('Aborted Successfully');
+            }
+            this.running = false;
+            if (finished_cb != null) {
+              return finished_cb();
+            }
+          };
+          this.rs.async_abort(cb);
+        } else {
+          if (typeof console !== "undefined" && console !== null) {
+            console.log('Cannot Abort Preloading');
+          }
           if (finished_cb != null) {
-            return finished_cb();
+            finished_cb();
           }
-        };
-        this.rs.async_abort(cb);
+        }
       } else {
         if (typeof console !== "undefined" && console !== null) {
           console.log('No Run Detected');
+        }
+        if (finished_cb != null) {
+          finished_cb();
         }
       }
     };

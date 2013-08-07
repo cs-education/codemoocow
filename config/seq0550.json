@@ -3,6 +3,8 @@
   "description": "Two correct and many incorrect ways to write this program",
   "task": "",
   "tags": "intro",
+  "gameType": "grid",
+  "backEnd": "interpreter",
   "editor": {
     "freeformEditting": false,
     "buttons": [
@@ -44,8 +46,5 @@
   "help": [
    
   ],
-  "dyk": [],
-  "depends": [
-    "game4"
-  ]
+  "dyk": []
 }

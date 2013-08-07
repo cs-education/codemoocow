@@ -224,7 +224,7 @@
       "overflow": "auto"
     });
     input.append('<div id="javasandboxsource' + editorCount + '"></div>');
-    sandBoxEditor = new PlayerCodeEditor('javasandboxsource' + editorCount, null, texti, false, "", "", true);
+    sandBoxEditor = new PlayerCodeEditor('javasandboxsource' + editorCount, null, texti, false, "", "", true, true, null);
     editorCount++;
     msg = "";
     stdout = function(str) {
@@ -235,7 +235,7 @@
       return console.log(mesg);
     };
     run = jQuery('<img>', {
-      id: 'runCode',
+      id: 'runCode' + editorCount,
       src: '/img/freeware/button_play_green-48px.png',
       css: {
         'max-height': '19%',
@@ -245,24 +245,25 @@
       alt: 'Run Button',
       title: 'Run the program',
       click: function(e) {
-        var finished_cb, srcText;
+        var finished_cb, srcText,
+          _this = this;
 
         textOutput.text('Running...');
-        jQuery('#runCode').hide();
-        jQuery('#abortCode').show();
+        jQuery(this).hide();
+        jQuery(this).siblings("img").show();
         msg = '';
         finished_cb = function() {
           stdout('');
-          jQuery('#abortCode').hide();
-          return jQuery('#runCode').show();
+          jQuery(_this).hide();
+          return jQuery(_this).siblings("img").show();
         };
         codeland.doppioAPI.abort();
         codeland.doppioAPI.setOutputFunctions(stdout, log);
         srcText = sandBoxEditor.getStudentCode();
         if (srcText.indexOf("[]") !== -1) {
           stdout('Arrays are not yet supported by our Web-based Java');
-          jQuery('#abortCode').hide();
-          jQuery('#runCode').show();
+          jQuery(this).siblings("img").hide();
+          jQuery(this).show();
         } else {
           codeland.doppioAPI.run(srcText, null, finished_cb);
         }
@@ -270,7 +271,7 @@
       }
     });
     abort = jQuery('<img>', {
-      id: 'abortCode',
+      id: 'abortCode' + editorCount,
       src: '/img/freeware/button_stop_red-48px.png',
       css: {
         'max-height': '19%',
@@ -280,12 +281,13 @@
       alt: 'Abort Button',
       title: 'Stop the currently running program',
       click: function(e) {
-        var aborted;
+        var aborted,
+          _this = this;
 
         aborted = function() {
           stdout("Stopped");
-          jQuery('#runCode').show();
-          return jQuery('#abortCode').hide();
+          jQuery(_this).siblings("img").show();
+          return jQuery(_this).hide();
         };
         codeland.doppioAPI.abort(aborted);
         e.preventDefault();
@@ -343,7 +345,7 @@
       "position": "static"
     });
     header.innerHTML = "Legal Terms and Attributions";
-    para.innerHTML = "        Copyright (C) 2013 The Board of Trustees at the University of Illinois    <br/>        Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the \"Software\"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:    <br/>        The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.    <br/>        THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.<hr>            <em>Third-party open-source content</em><br/>    Sounds from freesound and images from openclipart.org are licensed under <a href='http://creativecommons.org/publicdomain/zero/1.0/''>the creative commons 0 license</a>    ('game over','level completed' sounds; 'book', 'star' and treasure map icons)<br />    The Doppio jvm license is available <a href='https://github.com/int3/doppio/blob/master/LICENSE'>here</a>.    <br/>    The yellow arrow icon by Jack Cai and the grey keyboard icon by The Working Group downloaded from findicons.com is licensed under <a href='http://creativecommons.org/licenses/by-nd/2.5/'>Creative Commons Attributions no Derivatives</a>        <hr>        <em>Acknowledgements</em><br>    We wish to thank Holly, Maggie and Abby and the other participants at the 2013 University of Illinois Computer Science Summer G.A.M.E.S Camp for their game ideas, feedback and testing.        <br>    <em>Software development and bug contribution</em><br>    Original software created by University of Illinois students and faculty, Chris, Fabbian, James and Lawrence.    <br/>    ";
+    para.innerHTML = "        Copyright (C) 2013 The Board of Trustees at the University of Illinois    <br/>        Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the \"Software\"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:    <br/>        The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.    <br/>        THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.<hr>    <em>Third-party open-source content</em><br/>    Sounds from freesound and images from openclipart.org are licensed under <a href='http://creativecommons.org/publicdomain/zero/1.0/''>the creative commons 0 license</a>    ('game over','level completed' sounds; 'book', 'star' and treasure map icons)<br />    The Doppio jvm license is available <a href='https://github.com/int3/doppio/blob/master/LICENSE'>here</a>.    <br/>    The yellow arrow icon by Jack Cai and the grey keyboard icon by The Working Group downloaded from findicons.com is licensed under <a href='http://creativecommons.org/licenses/by-nd/2.5/'>Creative Commons Attributions no Derivatives</a>    <hr>    <em>Acknowledgements</em><br>    We wish to thank Holly, Maggie and Abby and the other participants at the 2013 University of Illinois Computer Science Summer G.A.M.E.S Camp for their game ideas, feedback and testing.    <br>    <em>Software development and bug contribution</em><br>    Original software created by University of Illinois students and faculty, Chris Liu, Fabian Junge, James Kelly and Lawrence Angrave.    <br/>    ";
     $(refContainer).append(header);
     $(refContainer).append(para);
     return $("#bF").click(closeClick);
