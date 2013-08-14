@@ -14,25 +14,23 @@
     });
     root.gameSelectionScrollPosition = 0;
     root.loadJSONConfigs();
-    root.initializeDoppio();
     root.UIcont = UIcont;
+    root.initializeDoppio();
   };
 
   root.initializeDoppio = function() {
+    var preload_cb;
+
     root.doppioReady = false;
     root.doppioPreloaded = false;
-    root.doppioAPI = new DoppioApi(null, root.log);
-    root.preloadDoppio();
+    preload_cb = function() {
+      root.doppioAPI.preload(root.beanshellPreload, root.wrapperCompiled_cb);
+      return root.doppioPreloaded = true;
+    };
+    root.doppioAPI = new DoppioApi(null, preload_cb);
   };
 
-  root.preloadDoppio = function() {
-    if (root.doppioPreloaded === false) {
-      root.doppioAPI.preload(root.beanshellPreload, root.wrapperCompiled);
-      root.doppioPreloaded = true;
-    }
-  };
-
-  root.wrapperCompiled = function() {
+  root.wrapperCompiled_cb = function() {
     var player;
 
     root.doppioReady = true;

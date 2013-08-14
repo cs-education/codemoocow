@@ -1,5 +1,5 @@
-fe88192 polish
-757c664 Merge branch 'beanshell-doppio'
-26614f5 Added support for bean shell class definition (needed java/security/ classes but not subdirs)
-448a413 New color levels
-6c546d9 bug fixes
+8edaf42 Text edit
+872869a New Doppio support and use relative paths for everything
+4935e92 Remove arbitrary game number from game selection screen
+4734c61 Fix Play/Abort logic
+53a52ae cleanup unused js

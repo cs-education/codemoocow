@@ -236,7 +236,7 @@
     };
     run = jQuery('<img>', {
       id: 'runCode' + editorCount,
-      src: '/img/freeware/button_play_green-48px.png',
+      src: 'img/freeware/button_play_green-48px.png',
       css: {
         'max-height': '19%',
         'display': 'block',
@@ -254,25 +254,19 @@
         msg = '';
         finished_cb = function() {
           stdout('');
-          jQuery(_this).hide();
-          return jQuery(_this).siblings("img").show();
+          jQuery(_this).show();
+          return jQuery(_this).siblings("img").hide();
         };
         codeland.doppioAPI.abort();
         codeland.doppioAPI.setOutputFunctions(stdout, log);
         srcText = sandBoxEditor.getStudentCode();
-        if (srcText.indexOf("[]") !== -1) {
-          stdout('Arrays are not yet supported by our Web-based Java');
-          jQuery(this).siblings("img").hide();
-          jQuery(this).show();
-        } else {
-          codeland.doppioAPI.run(srcText, null, finished_cb);
-        }
+        codeland.doppioAPI.run(srcText, null, finished_cb);
         e.preventDefault();
       }
     });
     abort = jQuery('<img>', {
       id: 'abortCode' + editorCount,
-      src: '/img/freeware/button_stop_red-48px.png',
+      src: 'img/freeware/button_stop_red-48px.png',
       css: {
         'max-height': '19%',
         'display': 'block',

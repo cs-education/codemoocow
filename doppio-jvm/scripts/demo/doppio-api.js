@@ -9,8 +9,9 @@
         Please do not call the constructor until the entire document has loaded
         (this is usually accomplished with jQuery(document).onReady)
     */
-    function DoppioApi(stdout, logIgnore) {
-      var stdin;
+    function DoppioApi(stdout, done_cb2) {
+      var done_cb1, stdin,
+        _this = this;
 
       this.stdout = stdout;
       this.abort = __bind(this.abort, this);
@@ -25,15 +26,18 @@
               time or abort requests. Set to null to disable logging.
       */
 
-      this.load_mini_rt();
-      this.bs_cl = new ClassLoader.BootstrapClassLoader(this.read_classfile);
-      jvm.set_classpath('/home/doppio/vendor/classes/', './');
       stdin = function() {
         return "\n";
       };
-      this.rs = new runtime.RuntimeState(this.output, stdin, this.bs_cl);
       this.running = false;
       this.preloaded = false;
+      done_cb1 = function() {
+        _this.bs_cl = new ClassLoader.BootstrapClassLoader(jvm.read_classfile);
+        jvm.set_classpath('/sys/vendor/classes', '/tmp/');
+        _this.rs = new runtime.RuntimeState(_this.output, stdin, _this.bs_cl);
+        return typeof done_cb2 === "function" ? done_cb2() : void 0;
+      };
+      this.load_mini_rt(done_cb1);
       return;
     }
 
@@ -60,71 +64,35 @@
       }
     };
 
-    DoppioApi.prototype.read_classfile = function(cls, cb, failure_cb) {
-      /*
-          Used internally in Doppio.
-          Read in a binary classfile synchronously. Return an array of bytes.
-      */
-
-      var data, e, fullpath, path, _i, _len, _ref;
-
-      cls = cls.slice(1, -1);
-      _ref = jvm.system_properties['java.class.path'];
-      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-        path = _ref[_i];
-        fullpath = "" + path + cls + ".class";
-        try {
-          data = util.bytestr_to_array(node.fs.readFileSync(fullpath));
-        } catch (_error) {
-          e = _error;
-          data = null;
-        }
-        if (data !== null && data.length > 0) {
-          return cb(data);
-        }
-      }
-      return failure_cb(function() {
-        throw new Error("Error: No file found for class " + cls + ".");
-      });
-    };
-
-    DoppioApi.prototype.load_mini_rt = function() {
+    DoppioApi.prototype.load_mini_rt = function(done_cb) {
       /*
           Loads the compressed pre-compiled java classes for Doppio
       */
+      node.fs.readFile("/sys/preload.tar", function(err, data) {
+        var write_one_file, xhrfs;
 
-      var data, done, e, end_untar, file_count, start_untar, writeOneFile;
-
-      try {
-        data = node.fs.readFileSync("/home/doppio/preload.tar");
-      } catch (_error) {
-        e = _error;
-        if (typeof console !== "undefined" && console !== null) {
-          console.error(e);
+        if (err) {
+          console.error("Error downloading preload.tar: " + err);
+          return;
         }
-      }
-      if (data === null) {
-        throw new Error("No mini-rt data");
-      }
-      file_count = 0;
-      done = false;
-      start_untar = (new Date()).getTime();
-      writeOneFile = function(percent, path, file) {
-        var base, base_dir, cls, ext, _ref;
+        xhrfs = node.fs.getRootFS().mntMap["/sys"];
+        write_one_file = function(percent, path, file) {
+          var e;
 
-        base_dir = 'vendor/classes/';
-        _ref = path.split('.'), base = _ref[0], ext = _ref[1];
-        file_count++;
-        cls = base.substr(base_dir.length);
-        if (file.length > 0) {
-          node.fs.writeFileSync(path, util.array_to_bytestr(file), 'utf8', true);
-        }
-      };
-      untar(new util.BytesArray(util.bytestr_to_array(data)), writeOneFile);
-      end_untar = (new Date()).getTime();
-      if (typeof console !== "undefined" && console !== null) {
-        console.log("Untarring took a total of " + (end_untar - start_untar) + "ms.");
-      }
+          if (path[0] !== '/') {
+            path = "/" + path;
+          }
+          try {
+            if (file.length > 0) {
+              return xhrfs.preloadFile(path, file);
+            }
+          } catch (_error) {
+            e = _error;
+            return console.error("Error writing " + path + ": " + e);
+          }
+        };
+        return untar(new util.BytesArray(data), write_one_file, done_cb);
+      });
     };
 
     DoppioApi.prototype.run = function(studentCode, gameContext, finished_cb) {

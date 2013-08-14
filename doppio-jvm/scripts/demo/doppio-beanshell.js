@@ -7,31 +7,30 @@
   root = window.coderunner = {};
 
   load_mini_rt = function() {
-    var data, done, e, file_count, writeOneFile;
+    return node.fs.readFile("/sys/preload.tar", function(err, data) {
+      var xhrfs;
 
-    try {
-      data = node.fs.readFileSync("/home/doppio/preload.tar");
-    } catch (_error) {
-      e = _error;
-      console.error(e);
-    }
-    if (data === null) {
-      throw new Error("No mini-rt data");
-    }
-    file_count = 0;
-    done = false;
-    writeOneFile = function(percent, path, file) {
-      var base, base_dir, cls, ext, _ref;
-
-      base_dir = 'vendor/classes/';
-      _ref = path.split('.'), base = _ref[0], ext = _ref[1];
-      file_count++;
-      cls = base.substr(base_dir.length);
-      if (file.length > 0) {
-        return node.fs.writeFileSync(path, util.array_to_bytestr(file), 'utf8', true);
+      if (err) {
+        console.error("Error downloading preload.tar: " + err);
+        return;
       }
-    };
-    return untar(new util.BytesArray(util.bytestr_to_array(data)), writeOneFile);
+      xhrfs = node.fs.getRootFS().mntMap["/sys"];
+      return untar(new util.BytesArray(data), (function(percent, path, file) {
+        var e;
+
+        if (path[0] !== '/') {
+          path = "/" + path;
+        }
+        try {
+          if (file.length > 0) {
+            return xhrfs.preloadFile(path, file);
+          }
+        } catch (_error) {
+          e = _error;
+          return console.error("Error writing " + path + ": " + e);
+        }
+      }));
+    });
   };
 
   saveFile = function(fname, contents) {
@@ -42,34 +41,10 @@
   };
 
   initializeDoppioEnvironment = function() {
-    var read_classfile;
-
     if (root.doppioEnvironmentInitialized) {
       return;
     }
-    read_classfile = function(cls, cb, failure_cb) {
-      var data, e, fullpath, path, _i, _len, _ref;
-
-      cls = cls.slice(1, -1);
-      _ref = jvm.system_properties['java.class.path'];
-      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-        path = _ref[_i];
-        fullpath = "" + path + cls + ".class";
-        try {
-          data = util.bytestr_to_array(node.fs.readFileSync(fullpath));
-        } catch (_error) {
-          e = _error;
-          data = null;
-        }
-        if (data !== null) {
-          return cb(data);
-        }
-      }
-      return failure_cb(function() {
-        throw new Error("Error: No file found for class " + cls + ".");
-      });
-    };
-    root._bs_cl = new ClassLoader.BootstrapClassLoader(read_classfile);
+    root._bs_cl = new ClassLoader.BootstrapClassLoader(jvm.read_classfile);
     return root.doppioEnvironmentInitialized = true;
   };
 
@@ -118,7 +93,7 @@
       this.outputDiv.text('Starting...3..');
       initializeDoppioEnvironment();
       this.outputDiv.text(this.outputDiv.text() + '2..');
-      fname = "program.bsh";
+      fname = "/tmp/program.bsh";
       contents = this.session.getValue();
       saveFile(fname, contents);
       msg = '';
@@ -135,7 +110,7 @@
       };
       this.rs = null;
       this.rs = new runtime.RuntimeState(stdout, stdin, root._bs_cl);
-      jvm.set_classpath('/home/doppio/vendor/classes/', './');
+      jvm.set_classpath('/sys/vendor/classes/', '/tmp/');
       this.outputDiv.text(this.outputDiv.text() + '1..');
       this.stopJavaBtn.click(function(e) {
         var aborted_cb;

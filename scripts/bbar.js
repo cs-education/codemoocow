@@ -55,9 +55,9 @@
     $(ref).attr({
       "height": "40%",
       "width": "30%",
-      "alt": "Java reference",
-      "src": "/img/cc0/Spiral_bound_book-128px.png",
-      "title": "Reference Page"
+      "alt": "Java book",
+      "src": "img/cc0/Spiral_bound_book-128px.png",
+      "title": "Java book"
     });
     $(ref).css({
       "position": "absolute",
@@ -68,8 +68,8 @@
       "height": "40%",
       "width": "35%",
       "alt": "Select level",
-      "src": "/img/cc0/treasuremap-128px.png",
-      "title": "Level Selection"
+      "src": "img/cc0/treasuremap-128px.png",
+      "title": "Select level"
     });
     $(select).css({
       "position": "absolute",
@@ -80,8 +80,8 @@
       "height": "40%",
       "width": "35%",
       "alt": "Code Sandbox",
-      "src": "/img/cc-bynd/keyboard.png",
-      "title": "Code SandBox"
+      "src": "img/cc-bynd/keyboard.png",
+      "title": "Code sandbox"
     });
     $(sand).css({
       "position": "absolute",

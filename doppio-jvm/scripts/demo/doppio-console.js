@@ -19,63 +19,30 @@
   bs_cl = null;
 
   preload = function() {
-    var data, done, e, file_count, on_complete, start_untar, update_bar;
+    return node.fs.readFile("/sys/preload.tar", function(err, data) {
+      var xhrfs;
 
-    try {
-      data = node.fs.readFileSync("/home/doppio/scripts/demo/mini-rt.tar");
-    } catch (_error) {
-      e = _error;
-      console.error(e);
-    }
-    if (data != null) {
-      file_count = 0;
-      done = false;
-      start_untar = (new Date).getTime();
-      on_complete = function() {
-        var end_untar;
+      if (err) {
+        console.error("Error downloading preload.tar: " + err);
+        return;
+      }
+      xhrfs = node.fs.getRootFS().mntMap["/sys"];
+      return untar(new util.BytesArray(data), (function(percent, path, file) {
+        var e;
 
-        end_untar = (new Date).getTime();
-        console.log("Untarring took a total of " + (end_untar - start_untar) + "ms.");
-        $('#overlay').fadeOut('slow');
-        $('#progress-container').fadeOut('slow');
-        return $('#console').click();
-      };
-      update_bar = _.throttle((function(percent, path) {
-        var bar, display_perc, preloading_file;
-
-        bar = $('#progress > .bar');
-        preloading_file = $('#preloading-file');
-        display_perc = Math.min(Math.ceil(percent * 100), 100);
-        bar.width("" + display_perc + "%", 150);
-        return preloading_file.text(display_perc < 100 ? "Loading " + path : "Done!");
+        if (path[0] !== '/') {
+          path = "/" + path;
+        }
+        try {
+          if (file.length > 0) {
+            return xhrfs.preloadFile(path, file);
+          }
+        } catch (_error) {
+          e = _error;
+          return console.error("Error writing " + path + ": " + e);
+        }
       }));
-      return untar(new util.BytesArray(util.bytestr_to_array(data)), (function(percent, path, file) {
-        var base, base_dir, cls, ext, _ref;
-
-        update_bar(percent, path);
-        base_dir = 'vendor/classes/';
-        _ref = path.split('.'), base = _ref[0], ext = _ref[1];
-        if (ext !== 'class') {
-          if (percent === 100) {
-            on_complete();
-          }
-          return;
-        }
-        file_count++;
-        cls = base.substr(base_dir.length);
-        return asyncExecute((function() {
-          node.fs.writeFileSync(path, util.array_to_bytestr(file), 'utf8', true);
-          if (--file_count === 0 && done) {
-            return on_complete();
-          }
-        }), 0);
-      }), function() {
-        done = true;
-        if (file_count === 0) {
-          return on_complete();
-        }
-      });
-    }
+    });
   };
 
   read_classfile = function(cls, cb, failure_cb) {
@@ -412,7 +379,7 @@
       return '  ' + cached_classes.sort().join('\n  ');
     },
     clear_cache: function() {
-      bs_cl = new ClassLoader.BootstrapClassLoader(read_classfile);
+      bs_cl = new ClassLoader.BootstrapClassLoader(jvm.read_classfile);
       return true;
     },
     ls: function(args) {

@@ -41,14 +41,13 @@
       });
       $(span).attr("id", "select" + game);
       cont.append(span);
-      src = '/img/stare.png';
+      src = 'img/stare.png';
       $(span).click(function() {
         return codeland.startGame(game);
       });
-      $(span).append(count + ' ');
       $(span).append(desc.title);
       if ((player != null ? player.passed : void 0) === true) {
-        src = '/img/star.png';
+        src = 'img/star.png';
         img = jQuery('<img>', {
           id: 'star',
           src: src,
