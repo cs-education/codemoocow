@@ -260,7 +260,12 @@
         codeland.doppioAPI.abort();
         codeland.doppioAPI.setOutputFunctions(stdout, log);
         srcText = sandBoxEditor.getStudentCode();
-        codeland.doppioAPI.run(srcText, null, finished_cb);
+        if (srcText.indexOf("class") !== -1) {
+          stdout('Classes are not yet supported by our Web-based Java');
+          finished_cb();
+        } else {
+          codeland.doppioAPI.run(srcText, null, finished_cb);
+        }
         e.preventDefault();
       }
     });

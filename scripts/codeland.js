@@ -19,15 +19,33 @@
   };
 
   root.initializeDoppio = function() {
-    var preload_cb;
+    var count, last_display, preload_cb, progress, progress_cb;
 
     root.doppioReady = false;
     root.doppioPreloaded = false;
+    progress = $('#progress');
+    count = 0;
+    last_display = "";
+    progress_cb = function(ignore_incorrect_fraction) {
+      var display;
+
+      count = count + 1;
+      display = Math.floor((100 * count) / 391);
+      if (display === 100) {
+        display = "Starting Java Virtual Machine...";
+      } else {
+        display = "Opening " + display;
+      }
+      if (last_display !== display) {
+        last_display = display;
+        return progress.html(display);
+      }
+    };
     preload_cb = function() {
       root.doppioAPI.preload(root.beanshellPreload, root.wrapperCompiled_cb);
       return root.doppioPreloaded = true;
     };
-    root.doppioAPI = new DoppioApi(null, preload_cb);
+    root.doppioAPI = new DoppioApi(null, preload_cb, progress_cb);
   };
 
   root.wrapperCompiled_cb = function() {

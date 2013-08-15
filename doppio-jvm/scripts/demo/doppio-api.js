@@ -9,7 +9,7 @@
         Please do not call the constructor until the entire document has loaded
         (this is usually accomplished with jQuery(document).onReady)
     */
-    function DoppioApi(stdout, done_cb2) {
+    function DoppioApi(stdout, done_cb2, progress_cb) {
       var done_cb1, stdin,
         _this = this;
 
@@ -37,7 +37,7 @@
         _this.rs = new runtime.RuntimeState(_this.output, stdin, _this.bs_cl);
         return typeof done_cb2 === "function" ? done_cb2() : void 0;
       };
-      this.load_mini_rt(done_cb1);
+      this.load_mini_rt(done_cb1, progress_cb);
       return;
     }
 
@@ -64,7 +64,7 @@
       }
     };
 
-    DoppioApi.prototype.load_mini_rt = function(done_cb) {
+    DoppioApi.prototype.load_mini_rt = function(done_cb, progress_cb) {
       /*
           Loads the compressed pre-compiled java classes for Doppio
       */
@@ -79,6 +79,9 @@
         write_one_file = function(percent, path, file) {
           var e;
 
+          if (typeof progress_cb === "function") {
+            progress_cb(percent);
+          }
           if (path[0] !== '/') {
             path = "/" + path;
           }
