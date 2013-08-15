@@ -1,0 +1,43 @@
+
+
+{
+  "title": "Returned early from work",
+  "description": "",
+  "task": "",
+  "tags": "intro",
+  "gameType": "paint",
+  "backEnd": "doppio",
+  "editor": {
+    "freeformEditting": false,
+    "buttons": [
+      "switchUp",
+      "switchDown","deleteLine",
+      "insertButtons"
+    ],
+    "commands": {
+      "shorthand": ["drawPixel(candy,candy,\"blue\");","if(candy==1)","return;","candy = candy - 1;"]
+    }
+  },
+  "code": {
+    "prefix": [
+      "void paint() {",
+"int candy = 5;",
+"\twhile(2+2 == 4) {"
+    ],
+
+    "postfix": "\t}\ndrawPixel(0,0,\"red\");\nreturn;\n}",
+    "comments": [
+      "Color Puzzle #16 - 'Returned early from work'","I returned early; I didn't want to eat the red candy."
+    ]
+  },
+  "game": {
+    "map": [
+"",".U","..U","...U","....U",".....U"
+    ],
+    "offset": {
+      "x": 0,
+      "y": 0
+    }
+  },
+  "dyk": []
+}

@@ -42,7 +42,7 @@
       _ref2 = this.gameConfig.characters;
       for (name in _ref2) {
         character = _ref2[name];
-        if (name.indexOf('Boarder') === -1) {
+        if (name.indexOf('Border') === -1) {
           character.color = character.sprite;
           this.picture[character.x][character.y] = character;
         }
