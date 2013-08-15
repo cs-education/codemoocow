@@ -33,4 +33,18 @@
     }
   };
 
+  window.onerror = function(msg, url, line) {
+    var progress;
+
+    window.onerror = null;
+    if (typeof console !== "undefined" && console !== null) {
+      console.log(arguments);
+    }
+    progress = $("#progress");
+    if (progress.length > 0) {
+      progress.html("Ooops!<br>Note for developers (" + msg + ":" + url + " at line " + line + ")");
+    }
+    return false;
+  };
+
 }).call(this);
