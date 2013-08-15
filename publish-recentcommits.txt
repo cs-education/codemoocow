@@ -1,5 +1,5 @@
+8e60485 Fixed json typo
 2eedf11 New Color Games
 6596e47 Fixed image filenames Boarder->Border
 28a7bc1 New color games
 dce1a07 Key typo change Boarder->Border
-538653f Added onerror function
