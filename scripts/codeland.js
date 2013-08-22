@@ -86,7 +86,7 @@
       addGameToMap(game);
     }
     tmp1 = document.getElementById("gameSelection");
-    $('<span style="font-size:200%">Choose your Java Game</span><br>').prependTo(tmp1);
+    $('<span style="font-size:200%" class="cursiveHeadline">Choose your Java Game</span><br>').prependTo(tmp1);
     $('<img src="/img/cc0/treasuremap-128px.png">').prependTo(tmp1);
     $('#gameSelection').animate({
       scrollTop: root.gameSelectionScrollPosition
@@ -125,10 +125,14 @@
       player: root.getPlayer(),
       codeland: this,
       backEnd: description.backEnd,
-      gameState: description.gameState
+      gameState: description.gameState,
+      stats: root.getGameStats()
     };
     root.currentGame = new GameManager(env);
     root.currentGame.startGame();
+    if (!(env.stats.runCount > 0)) {
+      root.currentGame.helpTips();
+    }
   };
 
   deepcopy = function(src) {
@@ -168,12 +172,58 @@
     root.setString(key, JSON.stringify(val));
   };
 
-  root.storeGameCompletionData = function(key, data) {
+  root.getGameStats = function(gameKey) {
+    var data, p, _base, _ref, _ref1, _ref10, _ref2, _ref3, _ref4, _ref5, _ref6, _ref7, _ref8, _ref9;
+
+    p = root.getPlayer();
+    if (gameKey == null) {
+      gameKey = p.currentGame;
+    }
+    data = (_ref = (_base = p.games)[gameKey]) != null ? _ref : _base[gameKey] = {};
+    if ((_ref1 = data.abortCount) == null) {
+      data.abortCount = 0;
+    }
+    if ((_ref2 = data.runCount) == null) {
+      data.runCount = 0;
+    }
+    if ((_ref3 = data.winCount) == null) {
+      data.winCount = 0;
+    }
+    if ((_ref4 = data.lostCount) == null) {
+      data.lostCount = 0;
+    }
+    if ((_ref5 = data.resetCount) == null) {
+      data.resetCount = 0;
+    }
+    if ((_ref6 = data.editCount) == null) {
+      data.editCount = 0;
+    }
+    if ((_ref7 = data.hiscore) == null) {
+      data.hiscore = 0;
+    }
+    if ((_ref8 = data.passed) == null) {
+      data.passed = false;
+    }
+    if ((_ref9 = data.stars) == null) {
+      data.stars = 0;
+    }
+    if ((_ref10 = data.tipsCount) == null) {
+      data.tipsCount = 0;
+    }
+    return data;
+  };
+
+  root.storeGameStats = function(key, data) {
     if (!((key != null) && (data != null))) {
       throw new Error("Cannot be null");
     }
     root.updatePlayer(function(p) {
-      return p.games[key] = data;
+      var _base, _ref;
+
+      if ((_ref = (_base = p.games)[key]) == null) {
+        _base[key] = {};
+      }
+      return $.extend(p.games[key], data);
     });
   };
 

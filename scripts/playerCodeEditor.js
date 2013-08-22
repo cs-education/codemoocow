@@ -173,9 +173,7 @@
           id: command,
           value: command,
           text: "" + line,
-          /*: #{usesRemaining}"
-          */
-
+          title: "" + usesRemaining + " remain",
           click: function(e) {
             (codeEditor.button(codeEditor.usesCurrentRow(codeEditor.usesTextDocument(funct)))).call(codeEditor, codeEditor.createNamedArguments({
               line: e.currentTarget.value

@@ -154,8 +154,6 @@
       }
       if (result != null ? result.continueExecution : void 0) {
         this.runCharacterCommand(character);
-      } else {
-        this.score++;
       }
     };
 
@@ -269,6 +267,20 @@
       });
     };
 
+    GridGameState.prototype.fail = function(line) {
+      this.protagonist.moves.push({
+        key: 'fail',
+        exec: (function(char, steps) {
+          this.protagonistFalls();
+          return {
+            success: true,
+            continueExecution: false
+          };
+        }).bind(this, this.protagonist, 1),
+        line: line
+      });
+    };
+
     GridGameState.prototype._moving = function(character) {
       if (character == null) {
         character = this.protagonist;
@@ -293,7 +305,7 @@
       if (character == null) {
         character = this.protagonist;
       }
-      if (isNaN(steps)) {
+      if (Number.isNaN(steps)) {
         throw new this.invalidParameterException(steps);
       }
       for (i = _i = 1; _i < steps; i = _i += 1) {
@@ -461,37 +473,22 @@
     };
 
     GridGameState.prototype.gameWon = function() {
-      var codeland, gameIndex, gameName, messages, questIndex;
-
       if (!this.startedGame) {
         return;
       }
-      playAudio('victory.ogg');
-      this.stars += 1;
-      this.score += 5;
       this.startedGame = false;
+      this.stars = 1;
+      this.score = 5;
       this.gameManager.gameWon(this.score, this.stars);
-      gameName = this.gameManager.gameName();
-      codeland = this.gameManager.environment.codeland;
-      gameIndex = codeland.currentQuest.games.indexOf(gameName);
-      questIndex = codeland.quests.indexOf(codeland.currentQuest);
-      if (++gameIndex === codeland.currentQuest.games.length) {
-        questIndex = ++questIndex % codeland.quests.length;
-        gameIndex = 0;
-      }
-      gameName = codeland.quests[questIndex].games[gameIndex];
-      messages = [];
-      messages[0] = 'Congratulations!';
-      window.objCloud(400, messages, "body", "30%", "30%", 1.5, gameName, this.gameManager);
-      this.gameManager.gameRunFinished();
     };
 
     GridGameState.prototype.gameLost = function() {
-      var character, messages, name, _ref;
+      var character, name, _ref;
 
       if (!this.startedGame) {
         return;
       }
+      this.startedGame = false;
       if (clockHandle != null) {
         clearInterval(clockHandle);
       }
@@ -503,13 +500,7 @@
         }
         character.moves = null;
       }
-      this.startedGame = false;
-      playAudio('defeat.ogg');
-      messages = [];
-      messages[0] = "Try Again!";
-      window.objCloud(400, messages, "body", "30%", "30%", 3, "none", this.gameManager);
-      clockHandle = setInterval(this.clock, 17);
-      this.gameManager.gameRunFinished();
+      this.gameManager.gameLost();
     };
 
     GridGameState.prototype.protagonistFalls = function() {
@@ -521,7 +512,7 @@
         character.moves = null;
       }
       this.visual.changeState(this.protagonist.index, 5);
-      setTimeout(this.gameLost, 400);
+      setTimeout(this.gameLost, 680);
     };
 
     GridGameState.prototype.stopGame = function() {
@@ -543,14 +534,8 @@
       var isEastOrWest, newx, newy, sign, _ref;
 
       _ref = [-1 + ((direction + 1) & 2), direction & 1], sign = _ref[0], isEastOrWest = _ref[1];
-      if (isEastOrWest) {
-        newx = currentX + sign;
-        newy = currentY;
-      }
-      if (!isEastOrWest) {
-        newx = currentX;
-        newy = currentY + sign;
-      }
+      newx = currentX + sign * isEastOrWest;
+      newy = currentY + sign * (1 - isEastOrWest);
       return [newx, newy];
     };
 
@@ -589,7 +574,11 @@
         line = steps;
         steps = 1;
       }
-      return this.gameState.move(this.gameState.protagonist, steps, line);
+      if (Number.isNaN(steps)) {
+        this.gameState.fail(line);
+      } else {
+        this.gameState.move(this.gameState.protagonist, steps, line);
+      }
     };
 
     GridGameCommands.prototype.turn = function(dir, line) {

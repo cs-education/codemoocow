@@ -137,34 +137,15 @@
     };
 
     PaintGameState.prototype.gameWon = function() {
-      var codeland, gameIndex, gameName, messages, questIndex;
-
       if (!this.startedGame) {
         return;
       }
       playAudio('victory.ogg');
-      this.stars += 1;
-      this.score += 5;
       this.startedGame = false;
-      this.gameManager.gameWon(this.score, this.stars);
-      gameName = this.gameManager.gameName();
-      codeland = this.gameManager.environment.codeland;
-      gameIndex = codeland.currentQuest.games.indexOf(gameName);
-      questIndex = codeland.quests.indexOf(codeland.currentQuest);
-      if (++gameIndex === codeland.currentQuest.games.length) {
-        questIndex = ++questIndex % codeland.quests.length;
-        gameIndex = 0;
-      }
-      gameName = codeland.quests[questIndex].games[gameIndex];
-      messages = [];
-      messages[0] = 'Congratulations!';
-      window.objCloud(400, messages, "body", "30%", "30%", 1.5, gameName, this.gameManager);
-      this.gameManager.gameRunFinished();
+      this.gameManager.gameWon();
     };
 
     PaintGameState.prototype.gameLost = function() {
-      var messages;
-
       if (!this.startedGame) {
         return;
       }
@@ -172,12 +153,8 @@
         clearInterval(clockHandle);
       }
       this.startedGame = false;
-      playAudio('defeat.ogg');
-      messages = [];
-      messages[0] = "Try Again!";
-      window.objCloud(400, messages, "body", "30%", "30%", 3, "none", this.gameManager);
       clockHandle = setInterval(this.clock, 17);
-      this.gameManager.gameRunFinished();
+      this.gameManager.gameLost();
     };
 
     PaintGameState.prototype.stopGame = function() {

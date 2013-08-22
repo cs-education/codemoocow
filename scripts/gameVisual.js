@@ -228,7 +228,6 @@
         } else {
           this.juheight--;
         }
-        console.log(this.juheight + ":" + this.crest);
         if (this.juheight === 1 && this.crest === true) {
           this.juheight = 0;
           this.crest = false;
@@ -248,7 +247,7 @@
       };
 
       charObj.prototype.current = function(anticker) {
-        var num, objState;
+        var fallFrames, fraction, num, objState;
 
         objState = [];
         num = 0;
@@ -262,15 +261,17 @@
         objState[2] = this.ySize;
         objState[3] = this.xOff;
         objState[4] = this.yOff;
+        fallFrames = 10.0;
         if (this.cstate === 5) {
-          if (this.fallticker > 20) {
+          if (this.fallticker > fallFrames) {
             objState[0] = univImg[0];
           } else {
             this.fallticker++;
-            objState[1] = this.xSize - this.fallticker;
-            objState[2] = this.ySize - this.fallticker;
-            objState[3] = this.xOff + this.fallticker / 2;
-            objState[4] = this.yOff + this.fallticker / 2;
+            fraction = this.fallticker / fallFrames;
+            objState[1] = this.xSize * (1 - fraction);
+            objState[2] = this.ySize * (1 - fraction);
+            objState[3] = this.xOff + fraction * this.xSize / 2;
+            objState[4] = this.yOff + fraction * this.ySize / 2;
           }
         } else {
           this.fallticker = 0;
@@ -399,10 +400,10 @@
 
 
     GameVisual.prototype.drawGrid = function(tmp, config) {
-      var grid, ps, _i, _j, _ref, _ref1, _ref2, _ref3, _ref4, _ref5;
+      var grid, index, ps, text, _i, _j, _k, _l, _ref, _ref1, _ref2, _ref3, _ref4, _ref5, _ref6, _ref7;
 
       grid = tmp.getContext("2d");
-      grid.fillStyle = "#FFFFFF";
+      grid.fillStyle = 'white';
       grid.fillRect(0, 0, 1000, 1000);
       grid.beginPath();
       for (ps = _i = _ref = config.border, _ref1 = (config.gridUnit * config.gridX) + config.border, _ref2 = config.gridUnit; _ref2 > 0 ? _i <= _ref1 : _i >= _ref1; ps = _i += _ref2) {
@@ -413,6 +414,25 @@
       }
       grid.strokeStyle = "black";
       grid.stroke();
+      grid.font = "15px sans-serif";
+      grid.textAlign = 'center';
+      grid.fillStyle = '#A0A0E0';
+      for (index = _k = 0, _ref6 = config.gridX - 1; 0 <= _ref6 ? _k <= _ref6 : _k >= _ref6; index = 0 <= _ref6 ? ++_k : --_k) {
+        if (index > 0) {
+          text = index;
+        } else {
+          text = 'x';
+        }
+        grid.fillText(text, config.border + config.gridUnit * (index + 0.5), config.border - config.gridUnit * 0.25);
+      }
+      for (index = _l = 0, _ref7 = config.gridY - 1; 0 <= _ref7 ? _l <= _ref7 : _l >= _ref7; index = 0 <= _ref7 ? ++_l : --_l) {
+        if (index > 0) {
+          text = index;
+        } else {
+          text = 'y';
+        }
+        grid.fillText(text, config.border - config.gridUnit * 0.35, config.border + config.gridUnit * (index + 0.5) + 6);
+      }
     };
 
     /*

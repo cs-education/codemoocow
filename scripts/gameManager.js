@@ -42,6 +42,10 @@
       return;
     }
 
+    GameManager.prototype.storeStats = function() {
+      return this.environment.codeland.storeGameStats(this.environment.key, this.environment.stats);
+    };
+
     GameManager.prototype.setUpGame = function() {
       /*
           Sets up everything for the game to run.
@@ -109,11 +113,11 @@
     };
 
     GameManager.prototype.interpretGameConfigMap = function() {
-      var achar, character, key, map, name, x, y, _ref;
+      var achar, character, key, map, name, x, y, _base, _base1, _base2, _base3, _ref, _ref1, _ref2, _ref3, _ref4;
 
-      x = this.config.game.offset.x;
-      y = this.config.game.offset.y;
-      map = this.config.game.map;
+      x = (_ref = (_base = this.config.game.offset).x) != null ? _ref : _base.x = 0;
+      y = (_ref1 = (_base1 = this.config.game.offset).y) != null ? _ref1 : _base1.y = 0;
+      map = (_ref2 = (_base2 = this.config.game).map) != null ? _ref2 : _base2.map = "";
       while (map !== "") {
         achar = map.substring(0, 1);
         if (achar in this.config.game.key) {
@@ -122,15 +126,15 @@
         }
         if (achar === '\n') {
           y++;
-          x = this.config.game.offset.x;
+          x = (_ref3 = (_base3 = this.config.game.offset).x) != null ? _ref3 : _base3.x = 0;
         } else {
           x++;
         }
         map = map.substring(1);
       }
-      _ref = this.config.game.characters;
-      for (key in _ref) {
-        character = _ref[key];
+      _ref4 = this.config.game.characters;
+      for (key in _ref4) {
+        character = _ref4[key];
         character.index = this.config.visual.characters.indexOf(character.visual);
       }
     };
@@ -188,24 +192,65 @@
       };
     };
 
-    GameManager.prototype.gameWon = function(score, stars) {
-      var player;
+    GameManager.prototype.gameLost = function() {
+      var messages;
+
+      this.updateGameLostStats();
+      playAudio('defeat.ogg');
+      messages = ["Try Again!"];
+      window.objCloud(400, messages, "body", "30%", "30%", 3, "none", this.gameManager);
+      return this.gameRunFinished();
+    };
+
+    GameManager.prototype.gameWon = function() {
+      var codeland, gameIndex, gameName, messages, questIndex;
+
+      this.updateGameWonStats();
+      playAudio('victory.ogg');
+      gameName = this.gameName();
+      codeland = this.environment.codeland;
+      gameIndex = codeland.currentQuest.games.indexOf(gameName);
+      questIndex = codeland.quests.indexOf(codeland.currentQuest);
+      if (++gameIndex === codeland.currentQuest.games.length) {
+        questIndex = ++questIndex % codeland.quests.length;
+        gameIndex = 0;
+      }
+      gameName = codeland.quests[questIndex].games[gameIndex];
+      messages = ['Congratulations!'];
+      window.objCloud(400, messages, "body", "30%", "30%", 1.5, gameName, this);
+      return this.gameRunFinished();
+    };
+
+    GameManager.prototype.updateGameLostStats = function() {
+      var s;
+
+      s = this.environment.stats;
+      s.lostCount += 1;
+      s.lastLoss = Date.now();
+      if (!s.firstLoss) {
+        s.firstLoss = s.lastLoss;
+      }
+      return this.storeStats();
+    };
+
+    GameManager.prototype.updateGameWonStats = function(score, stars) {
+      var isNewHiscore, s;
 
       log("Game Won: " + this.environment.key);
-      player = this.environment.player;
-      if (player.games[this.environment.key] != null) {
-        if ((player.games[this.environment.key].hiscore != null) > score) {
-          score = player.games[this.environment.key].hiscore;
-        }
-        if ((player.games[this.environment.key].stars != null) > stars) {
-          stars = player.games[this.environment.key].stars;
-        }
+      s = this.environment.stats;
+      s.winCount += 1;
+      s.passed = true;
+      s.lastWin = Date.now();
+      if (!s.firstWin) {
+        s.firstWin = s.lastWin;
       }
-      this.environment.codeland.storeGameCompletionData(this.environment.key, {
-        hiscore: score,
-        stars: stars,
-        passed: true
-      });
+      s.stars = Math.max(stars, s.stars);
+      isNewHiscore = s.hiscore < score;
+      if (isNewHiscore) {
+        s.hiscore = score;
+      }
+      this.storeStats();
+      return isNewHiscore;
     };
 
     GameManager.prototype.finishGame = function() {
@@ -241,6 +286,8 @@
     };
 
     GameManager.prototype.reset = function() {
+      this.environment.stats.resetCount += 1;
+      this.storeStats();
       this.codeEditor.resetEditor();
       this.startGame(false);
     };
@@ -255,6 +302,8 @@
       code = this.codeEditor.getStudentCode();
       jQuery('#compileAndRun').hide();
       jQuery('#stopRun').show();
+      this.environment.stats.runCount += 1;
+      this.storeStats();
       if (this.environment.backEnd === 'interpreter') {
         this.codeEditor.scan();
         if (!this.canRun) {
@@ -290,6 +339,8 @@
       if (!this.running) {
         return;
       }
+      this.environment.stats.abortCount += 1;
+      this.storeStats();
       if (this.environment.backEnd === 'doppio') {
         this.environment.codeland.doppioAPI.abort(this.showRun);
       } else {
@@ -312,6 +363,8 @@
     GameManager.prototype.helpTips = function() {
       var conf, ma, title, _ref, _ref1;
 
+      this.environment.stats.tipsCount += 1;
+      this.storeStats();
       ma = (_ref = this.config) != null ? (_ref1 = _ref.code) != null ? _ref1.comments : void 0 : void 0;
       if (ma) {
         if (ma.length > 1) {
