@@ -69,23 +69,30 @@
   root.reference = function() {};
 
   root.drawGameMap = function(player) {
-    var addGameToMap, count, descriptions, game, gameSequence, mapDiv, sel, tmp1, _i, _len;
+    var addGameToMap, count, descriptions, gameKey, gameSequence, mapDiv, qcount, quest, sel, tmp1, _i, _j, _len, _len1, _ref, _ref1;
 
     descriptions = root.getGameDescriptions();
     mapDiv = $(root.UIcont);
     mapDiv.empty();
     gameSequence = root.getGameSequence();
     sel = new gameSelector(mapDiv, false);
+    tmp1 = document.getElementById("gameSelection");
     count = 0;
     addGameToMap = function(game) {
       count = count + 1;
       return sel.buildDiv(count, game, descriptions[game], player.games[game], root.canPlay(game), codeland);
     };
-    for (_i = 0, _len = gameSequence.length; _i < _len; _i++) {
-      game = gameSequence[_i];
-      addGameToMap(game);
+    qcount = 0;
+    _ref = root.quests;
+    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+      quest = _ref[_i];
+      $("<div bgcolor='#888888'>Quest " + (++qcount) + ":" + quest.title + "</div>").appendTo(tmp1);
+      _ref1 = quest.games;
+      for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
+        gameKey = _ref1[_j];
+        addGameToMap(gameKey);
+      }
     }
-    tmp1 = document.getElementById("gameSelection");
     $('<span style="font-size:200%" class="cursiveHeadline">Choose your Java Game</span><br>').prependTo(tmp1);
     $('<img src="/img/cc0/treasuremap-128px.png">').prependTo(tmp1);
     $('#gameSelection').animate({
@@ -109,6 +116,7 @@
     if (root.currentGame) {
       root.currentGame.finishGame();
     }
+    root.currentGame = null;
     gamediv = $(root.UIcont);
     tmp1 = document.getElementById("gameSelection");
     if (tmp1 !== null) {
@@ -327,17 +335,18 @@
       root.quests = [];
       root.visualMasters = {};
       root.beanshellPreload = data.beanshellPreload;
-      questIndex = 0;
+      questIndex = -1;
       _ref1 = data.quests;
       for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
         quest = _ref1[_j];
         root.readJSON("config/" + quest, function(questData) {
           var game, _k, _len2, _ref2;
 
-          if (questData === void 0) {
+          if (questData === void 0 || questData.key === void 0) {
             configFail = true;
           }
-          root.quests[questIndex++] = questData;
+          ++questIndex;
+          root.quests[questIndex] = questData;
           _ref2 = questData.games;
           for (_k = 0, _len2 = _ref2.length; _k < _len2; _k++) {
             game = _ref2[_k];
