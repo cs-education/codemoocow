@@ -467,7 +467,7 @@
     }
     if (gameData.code.comments) {
       one = '// ' + ((gameData.code.comments.join('\n')).replace(/\n/g, '\n// ')) + '\n';
-      if (gameData.code.prefix) {
+      if (gameData.code.prefix.length > 1) {
         gameData.code.prefix = one + gameData.code.prefix;
       } else {
         gameData.code.initial = one + '\n' + gameData.code.initial;

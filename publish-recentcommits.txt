@@ -1,5 +1,5 @@
+4ad3ce2 Fixes #39
+e6d0d09 Comment prepend bugfix
+c7f6fda Polish color games
 6fc0ce9 Insert logic to bound rather than inserts into prefix and suffix
 11bf906 Display error as an alert if codemoo location is localhost
-173c2a3 Polish game grid (e.g. axis labels for paintGame)
-cea66da Fixed gameStats bug
-e86496e Inserted new game3

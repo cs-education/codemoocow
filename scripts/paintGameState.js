@@ -85,7 +85,7 @@
         pixel = _ref[name];
         expected = pixel.match;
         if (expected == null) {
-          expected = name;
+          expected = pixel.color;
         }
         if (expected === ((_ref1 = this.picture[pixel.x][pixel.y]) != null ? _ref1.color : void 0)) {
           this.picture[pixel.x][pixel.y].matched = true;
