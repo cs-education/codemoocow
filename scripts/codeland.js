@@ -94,7 +94,7 @@
   };
 
   root.startGame = function(game) {
-    var description, env, found, gamediv, index, quest, tmp1, _i, _len, _ref;
+    var description, env, found, gamediv, index, quest, stats, tmp1, _i, _len, _ref;
 
     console.log("Starting " + game);
     _ref = root.quests;
@@ -116,6 +116,9 @@
       root.UIcont.removeChild(tmp1);
     }
     description = root.getGameDescriptions()[game];
+    stats = root.loadGameStats(game);
+    stats.openedCount++;
+    root.storeGameStats(game, stats);
     env = {
       key: game,
       description: description,
@@ -126,7 +129,7 @@
       codeland: this,
       backEnd: description.backEnd,
       gameState: description.gameState,
-      stats: root.loadGameStats(game)
+      stats: stats
     };
     root.currentGame = new GameManager(env);
     root.currentGame.startGame();
@@ -192,8 +195,8 @@
     if ((_ref5 = data.resetCount) == null) {
       data.resetCount = 0;
     }
-    if ((_ref6 = data.editCount) == null) {
-      data.editCount = 0;
+    if ((_ref6 = data.openedCount) == null) {
+      data.openedCount = 0;
     }
     if ((_ref7 = data.hiscore) == null) {
       data.hiscore = 0;
@@ -251,13 +254,7 @@
       first: '',
       last: '',
       avator: 'generic',
-      games: {
-        java1a: {
-          hiscore: 20,
-          stars: 1,
-          passed: true
-        }
-      }
+      games: {}
     };
   };
 

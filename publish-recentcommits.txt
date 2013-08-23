@@ -1,5 +1,5 @@
+b8e8ca8 Count number of times each game is opened
+3c15e75 Game instructions/Comment polish
+400fa38 Updated title; removed unused font
 4ad3ce2 Fixes #39
 e6d0d09 Comment prepend bugfix
-c7f6fda Polish color games
-6fc0ce9 Insert logic to bound rather than inserts into prefix and suffix
-11bf906 Display error as an alert if codemoo location is localhost
