@@ -41,8 +41,11 @@
       console.log(arguments);
     }
     progress = $("#progress");
-    if (progress.length > 0) {
+    if ((progress != null ? progress.length : void 0) > 0) {
       progress.html("Ooops!<br>Note for developers (" + msg + ":" + url + " at line " + line + ")");
+    }
+    if (window.location.hostname === 'localhost') {
+      alert("" + msg + "\n+" + url + " " + line);
     }
     return false;
   };

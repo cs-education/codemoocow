@@ -118,7 +118,6 @@
       this.onStudentCodeChange();
       this.moveEditorButtonDelay = 30;
       setTimeout(this.moveEditorButtons, this.moveEditorButtonDelay);
-      this.editor.gotoLine(this.findFirstNonCommentLine(this.codeConfig.initial));
     };
 
     EditorManager.prototype.setUpInsertButtons = function() {
@@ -127,7 +126,7 @@
           with the id of 'insertButtons'.
       */
 
-      var button, buttonField, buttons, codeEditor, command, funct, line, lineText, maxUses, usesRemaining, _i, _len, _ref1;
+      var button, buttonField, buttons, codeEditor, command, funct, line, lineText, maxUses, _i, _len, _ref1;
 
       if ($.inArray('insertButtons', this.editorConfig.buttons) === -1) {
         return;
@@ -168,12 +167,11 @@
           line = this.editor.createBlankFunctionHeader(command) + ';';
           funct = codeEditor.insertCommand;
         }
-        usesRemaining = this.commands[command]['usesRemaining'];
         button = jQuery('<button>', {
           id: command,
           value: command,
           text: "" + line,
-          title: "" + usesRemaining + " remain",
+          title: this.toUsesRemainingText(maxUses, maxUses),
           click: function(e) {
             (codeEditor.button(codeEditor.usesCurrentRow(codeEditor.usesTextDocument(funct)))).call(codeEditor, codeEditor.createNamedArguments({
               line: e.currentTarget.value
@@ -282,6 +280,7 @@
         } else {
           usesRemaining = this.commands[command]['usesRemaining'];
         }
+        button.attr('title', this.toUsesRemainingText(usesRemaining, this.commands[command].maxUses));
         if (usesRemaining <= 0) {
           button.attr('disabled', true);
           if (usesRemaining < 0) {
@@ -298,6 +297,19 @@
       if (typeof this.onCommandRemainingValid === "function") {
         this.onCommandRemainingValid(valid);
       }
+    };
+
+    EditorManager.prototype.toUsesRemainingText = function(usesRemaining, maxUses) {
+      if (usesRemaining <= 0) {
+        return 'Already used (delete the code line to re-use this button)';
+      }
+      if (usesRemaining === 1 && maxUses === 1) {
+        return 'Can only appear once!';
+      }
+      if (usesRemaining === 1) {
+        return 'Can only appear one more time!';
+      }
+      return "Can be used " + usesRemaining + " more times";
     };
 
     EditorManager.prototype.moveEditorButtons = function() {
@@ -519,35 +531,6 @@
       return -1;
     };
 
-    EditorManager.prototype.findFirstNonCommentLine = function(src) {
-      var count, countEndMLC, countStartMLC, inMLC, isSLC, line, lines, _i, _len, _ref1;
-
-      lines = src.split('\n');
-      count = 0;
-      inMLC = false;
-      _ref1 = src.split('\n');
-      for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
-        line = _ref1[_i];
-        count += 1;
-        if (line.match(/^S*$/)) {
-          continue;
-        }
-        isSLC = !!line.match(/^\s*\/\//);
-        countStartMLC = line.split('/*').length - 1;
-        countEndMLC = line.split('*/').length - 1;
-        if (inMLC) {
-          if (!isSLC) {
-            inMLC = countStartMLC > countEndMLC;
-          }
-        } else {
-          if (!isSLC && !(inMLC = countStartMLC > countEndMLC)) {
-            break;
-          }
-        }
-      }
-      return count;
-    };
-
     return EditorManager;
 
   })();
@@ -556,9 +539,10 @@
     /*
         Creates and provides functionality for an Ace editor representing player's code.
     */
-    function PlayerCodeEditor(editorDivId, commands, codeText, wrapCode, codePrefix, codeSuffix, hiddenSuffix, freeEdit, interpreter) {
+    function PlayerCodeEditor(editorDivId, commands, initialText, wrapCode, codePrefix, codeSuffix, hiddenSuffix, freeEdit, interpreter) {
       this.editorDivId = editorDivId;
       this.commands = commands;
+      this.initialText = initialText;
       this.wrapCode = wrapCode;
       this.codePrefix = codePrefix;
       this.codeSuffix = codeSuffix;
@@ -585,7 +569,7 @@
       this.codeSuffixLength = 0;
       if (this.wrapCode === true) {
         if (this.codePrefix !== "") {
-          this.codeText = this.codePrefix + codeText;
+          this.codeText = this.codePrefix + this.initialText;
           this.codePrefixLength = this.codePrefix.split('\n').length - 1;
         }
         if (this.codeSuffix !== "") {
@@ -595,13 +579,12 @@
       } else {
         this.codePrefix = "";
         this.codeSuffix = "";
-        this.codeText = codeText;
+        this.codeText = this.initialText;
       }
       this.enableKeyboardShortcuts();
       this.resetState();
       this.onChangeCallback = null;
       this.editor.on('change', this.onChange);
-      this.gotoLine(this.codePrefixLength + 1);
       return;
     }
 
@@ -725,13 +708,9 @@
     };
 
     PlayerCodeEditor.prototype.insertCommand = function(_arg) {
-      var currentRow, line, maxRow, printLine, text;
+      var currentRow, line, printLine, text;
 
       text = _arg.text, line = _arg.line, currentRow = _arg.currentRow;
-      maxRow = this.editSession.getLength();
-      if (currentRow + 1 < this.codePrefixLength || currentRow + 1 >= maxRow - (this.codeSuffixLength - 1)) {
-        return;
-      }
       this.commands[line]['usesRemaining']--;
       printLine = (this.createBlankFunctionHeader(line)) + ';';
       this.insertLine({
@@ -746,9 +725,8 @@
 
       text = _arg.text, line = _arg.line, currentRow = _arg.currentRow;
       maxRow = this.editSession.getLength();
-      if (currentRow + 1 < this.codePrefixLength || currentRow + 1 >= maxRow - (this.codeSuffixLength - 1)) {
-        return;
-      }
+      currentRow = Math.max(currentRow, this.codePrefixLength - 1);
+      currentRow = Math.min(currentRow, maxRow - this.codeSuffixLength - 1);
       currentLine = text.getLine(currentRow);
       if (this.commands.hasOwnProperty(line)) {
         this.commands[line]['usesRemaining']--;
@@ -793,7 +771,7 @@
       this.editor.clearSelection();
       this.editor.resize();
       this.reIndentCode();
-      this.gotoLine(this.codePrefixLength + 1);
+      this.gotoLine(this.codePrefixLength + 1 + this.findFirstNonCommentLine(this.initialText));
       this.editor.renderer.scrollToRow(this.codePrefixLength);
       _ref1 = this.commands;
       for (name in _ref1) {
@@ -995,6 +973,41 @@
         return false;
       }
       return true;
+    };
+
+    PlayerCodeEditor.prototype.findFirstNonCommentLine = function(src) {
+      /*
+          Returns the line numer of the first non-comment line.
+          This is obviously not a complete parser so obscure edge cases are unsupported
+          e.g. print("/*") would be mistaken for a multiline comment.
+      */
+
+      var count, countEndMLC, countStartMLC, inMLC, isSLC, line, lines, _i, _len, _ref1;
+
+      lines = src.split('\n');
+      count = 0;
+      inMLC = false;
+      _ref1 = src.split('\n');
+      for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
+        line = _ref1[_i];
+        count += 1;
+        if (line.match(/^S*$/)) {
+          continue;
+        }
+        isSLC = !!line.match(/^\s*\/\//);
+        countStartMLC = line.split('/*').length - 1;
+        countEndMLC = line.split('*/').length - 1;
+        if (inMLC) {
+          if (!isSLC) {
+            inMLC = countStartMLC > countEndMLC;
+          }
+        } else {
+          if (!isSLC && !(inMLC = countStartMLC > countEndMLC)) {
+            break;
+          }
+        }
+      }
+      return count;
     };
 
     return PlayerCodeEditor;
