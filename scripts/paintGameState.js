@@ -77,22 +77,37 @@
       this.tick++;
     };
 
-    PaintGameState.prototype.checkEvents = function() {
-      var name, pixel, won, _ref, _ref1;
+    PaintGameState.prototype.checkPainting = function() {
+      var expected, name, pixel, x, y, _i, _j, _ref, _ref1, _ref2, _ref3;
 
-      if (this.finishedExecuting) {
-        won = true;
-        _ref = this.gameConfig.characters;
-        for (name in _ref) {
-          pixel = _ref[name];
-          if (pixel.match == null) {
+      _ref = this.gameConfig.characters;
+      for (name in _ref) {
+        pixel = _ref[name];
+        expected = pixel.match;
+        if (expected == null) {
+          expected = name;
+        }
+        if (expected === ((_ref1 = this.picture[pixel.x][pixel.y]) != null ? _ref1.color : void 0)) {
+          this.picture[pixel.x][pixel.y].matched = true;
+        } else {
+          return false;
+        }
+      }
+      for (x = _i = 0, _ref2 = this.gameManager.config.visual.grid.gridX; 0 <= _ref2 ? _i <= _ref2 : _i >= _ref2; x = 0 <= _ref2 ? ++_i : --_i) {
+        for (y = _j = 0, _ref3 = this.gameManager.config.visual.grid.gridY; 0 <= _ref3 ? _j <= _ref3 : _j >= _ref3; y = 0 <= _ref3 ? ++_j : --_j) {
+          pixel = this.picture[x][y];
+          if (!pixel || pixel.matched) {
             continue;
           }
-          if (pixel.match !== ((_ref1 = this.picture[pixel.x][pixel.y]) != null ? _ref1.color : void 0)) {
-            won = false;
-          }
+          return false;
         }
-        if (won) {
+      }
+      return true;
+    };
+
+    PaintGameState.prototype.checkEvents = function() {
+      if (this.finishedExecuting) {
+        if (this.checkPainting()) {
           this.gameWon();
         } else {
           this.gameLost();
@@ -140,8 +155,7 @@
       if (!this.startedGame) {
         return;
       }
-      playAudio('victory.ogg');
-      this.startedGame = false;
+      this.stopGame();
       this.gameManager.gameWon();
     };
 
@@ -149,11 +163,7 @@
       if (!this.startedGame) {
         return;
       }
-      if (clockHandle != null) {
-        clearInterval(clockHandle);
-      }
-      this.startedGame = false;
-      clockHandle = setInterval(this.clock, 17);
+      this.stopGame();
       this.gameManager.gameLost();
     };
 
@@ -161,6 +171,7 @@
       if (clockHandle != null) {
         clearInterval(clockHandle);
       }
+      clockHandle = null;
       this.startedGame = false;
     };
 

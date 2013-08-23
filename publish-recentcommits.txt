@@ -1,5 +1,5 @@
+173c2a3 Polish game grid (e.g. axis labels for paintGame)
+cea66da Fixed gameStats bug
+e86496e Inserted new game3
 e1ff750 Code cleanup;map labels0-9;missing parameter ->gameLost
 b4f8379 New fonts
-2a7e5fc Scrollbar support
-5346708 Added CJ to acknowledgements
-8e60485 Fixed json typo

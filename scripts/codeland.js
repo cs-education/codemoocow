@@ -126,7 +126,7 @@
       codeland: this,
       backEnd: description.backEnd,
       gameState: description.gameState,
-      stats: root.getGameStats()
+      stats: root.loadGameStats(game)
     };
     root.currentGame = new GameManager(env);
     root.currentGame.startGame();
@@ -172,13 +172,10 @@
     root.setString(key, JSON.stringify(val));
   };
 
-  root.getGameStats = function(gameKey) {
+  root.loadGameStats = function(gameKey) {
     var data, p, _base, _ref, _ref1, _ref10, _ref2, _ref3, _ref4, _ref5, _ref6, _ref7, _ref8, _ref9;
 
     p = root.getPlayer();
-    if (gameKey == null) {
-      gameKey = p.currentGame;
-    }
     data = (_ref = (_base = p.games)[gameKey]) != null ? _ref : _base[gameKey] = {};
     if ((_ref1 = data.abortCount) == null) {
       data.abortCount = 0;
@@ -463,11 +460,18 @@
   };
 
   root.addHintsToCode = function(gameData) {
-    var one;
+    var one, _base, _ref;
 
+    if ((_ref = (_base = gameData.code).initial) == null) {
+      _base.initial = '';
+    }
     if (gameData.code.comments) {
-      one = '// ' + ((gameData.code.comments.join('\n')).replace(/\n/g, '\n// '));
-      gameData.code.initial = one + '\n' + (gameData.code.initial != null ? gameData.code.initial : '');
+      one = '// ' + ((gameData.code.comments.join('\n')).replace(/\n/g, '\n// ')) + '\n';
+      if (gameData.code.prefix) {
+        gameData.code.prefix = one + gameData.code.prefix;
+      } else {
+        gameData.code.initial = one + '\n' + gameData.code.initial;
+      }
     }
   };
 

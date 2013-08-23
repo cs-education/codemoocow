@@ -476,30 +476,17 @@
       if (!this.startedGame) {
         return;
       }
-      this.startedGame = false;
+      this.stopGame();
       this.stars = 1;
       this.score = 5;
       this.gameManager.gameWon(this.score, this.stars);
     };
 
     GridGameState.prototype.gameLost = function() {
-      var character, name, _ref;
-
       if (!this.startedGame) {
         return;
       }
-      this.startedGame = false;
-      if (clockHandle != null) {
-        clearInterval(clockHandle);
-      }
-      _ref = this.gameConfig.characters;
-      for (name in _ref) {
-        character = _ref[name];
-        if (this.visual.getState(character.index) !== 5) {
-          this.visual.changeState(character.index, 4);
-        }
-        character.moves = null;
-      }
+      this.stopGame();
       this.gameManager.gameLost();
     };
 
@@ -518,16 +505,18 @@
     GridGameState.prototype.stopGame = function() {
       var character, name, _ref;
 
+      this.startedGame = false;
       if (clockHandle != null) {
         clearInterval(clockHandle);
       }
       _ref = this.gameConfig.characters;
       for (name in _ref) {
         character = _ref[name];
-        this.visual.changeState(character.index, 4);
+        if (this.visual.getState(character.index) !== 5) {
+          this.visual.changeState(character.index, 4);
+        }
         character.moves = null;
       }
-      this.startedGame = false;
     };
 
     GridGameState.prototype.computeStepInDirection = function(direction, currentX, currentY) {
