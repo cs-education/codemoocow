@@ -1,5 +1,5 @@
+05587af Added acknowledgement for John Vilk and Plasma
 2a86746 Fixes #43; Game selection is now split into quests
 96fb731 Resized bbar. Turned off hiding ability
 95233e3 Split quest2 into quest2 + quest3
 b8e8ca8 Count number of times each game is opened
-3c15e75 Game instructions/Comment polish
