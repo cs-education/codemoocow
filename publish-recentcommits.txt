@@ -1,5 +1,5 @@
+4f28281 include sample code in sandbox
 27f64d5 Fixed size game button icons to support larger screen
 6ddc26d removed codemoo graphic
 05587af Added acknowledgement for John Vilk and Plasma
 2a86746 Fixes #43; Game selection is now split into quests
-96fb731 Resized bbar. Turned off hiding ability
