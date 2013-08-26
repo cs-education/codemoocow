@@ -85,10 +85,10 @@
         "border": "4px double #3F80C0"
       });
       this.gameDiv.append(vis);
-      $(editdiv).append('<img height="15%" style="position:absolute;bottom:1%;right:1%" alt="Play" id="compileAndRun" src="img/freeware/button_play_green-48px.png" title="Run Code"/>');
-      $(editdiv).append('<img height="15%" style="position:absolute;bottom:1%;right:1%" alt="Stop" id="stopRun" src="img/freeware/button_stop_red-48px.png" title="Stop Code"/>');
-      $(editdiv).append('<img height="15%" style="position:absolute;bottom:1%;right:8%" alt="Reset" title="Restart level (reset code back to original)" id="resetState" src="img/cc-bynd/undo_yellow-48px.png"/>');
-      $(editdiv).append('<img height="15%" style="position:absolute;bottom:1%;right:15%" alt="Help/Tips" title="Help/Tips" id="help" src="img/freeware/info-48px.png"/>');
+      $(editdiv).append('<img height="48" style="position:absolute;bottom:1%;right:1%" alt="Play" id="compileAndRun" src="img/freeware/button_play_green-48px.png" title="Run Code"/>');
+      $(editdiv).append('<img height="48" style="position:absolute;bottom:1%;right:1%" alt="Stop" id="stopRun" src="img/freeware/button_stop_red-48px.png" title="Stop Code"/>');
+      $(editdiv).append('<img height="48" style="position:absolute;bottom:1%;right:8%" alt="Reset" title="Restart level (reset code back to original)" id="resetState" src="img/cc-bynd/undo_yellow-48px.png"/>');
+      $(editdiv).append('<img height="48" style="position:absolute;bottom:1%;right:15%" alt="Help/Tips" title="Help/Tips" id="help" src="img/freeware/info-48px.png"/>');
       jQuery('#stopRun').hide();
       this.codeEditor = new EditorManager(this.editorDiv, this.config.editor, this.config.code);
       this.interpreter = new CodeInterpreter(this.config.editor.commands);
