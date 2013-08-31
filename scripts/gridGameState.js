@@ -305,7 +305,7 @@
       if (character == null) {
         character = this.protagonist;
       }
-      if (Number.isNaN(steps)) {
+      if (isNaN(steps)) {
         throw new this.invalidParameterException(steps);
       }
       for (i = _i = 1; _i < steps; i = _i += 1) {
@@ -563,7 +563,7 @@
         line = steps;
         steps = 1;
       }
-      if (Number.isNaN(steps)) {
+      if (isNaN(steps)) {
         this.gameState.fail(line);
       } else {
         this.gameState.move(this.gameState.protagonist, steps, line);

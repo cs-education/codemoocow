@@ -1,5 +1,5 @@
+7c49bb8 Safari Support Did not support Number.isNaN
+0dd246b added browserfs
+3f8b1a6 Added gLong.js
 4f28281 include sample code in sandbox
 27f64d5 Fixed size game button icons to support larger screen
-6ddc26d removed codemoo graphic
-05587af Added acknowledgement for John Vilk and Plasma
-2a86746 Fixes #43; Game selection is now split into quests
