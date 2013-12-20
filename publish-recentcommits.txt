@@ -1,5 +1,5 @@
-8a52503 License updates
-47a677b Added sun/text classes \(required by String.format\)
-7c49bb8 Safari Support Did not support Number.isNaN
-0dd246b added browserfs
-3f8b1a6 Added gLong.js
+7f108b5 allows coursera-integration to be published (but no longer master)
+b0ba7e8 hiding integration for now
+0637c69 making progress, running into Access-Control-Allow-Origin issue
+8247d7e added default maxScore to non-gameType specific config
+eff6d10 Merge branch 'master' into coursera-integration

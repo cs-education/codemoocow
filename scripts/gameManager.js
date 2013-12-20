@@ -30,10 +30,22 @@
       this.showRun = __bind(this.showRun, this);
       this.stopStudentCode = __bind(this.stopStudentCode, this);
       this.runStudentCode = __bind(this.runStudentCode, this);
+      this.resetCode = __bind(this.resetCode, this);
+      this.resetGame = __bind(this.resetGame, this);
       this.reset = __bind(this.reset, this);
       this.commandsValid = __bind(this.commandsValid, this);
       this.startGame = __bind(this.startGame, this);
       this.gameName = __bind(this.gameName, this);
+      /*
+          External Function (used by something outside of this file)
+      
+          Takes in the game environment and sets up the code editor and
+          the game visual and the game logic.
+      
+          @param environment
+              The environment and configuration required for this game.
+      */
+
       this.config = deepcopy(this.environment.description);
       this.gameStateBase = this.environment.gameState;
       this.editorDiv = 'codeEditor';
@@ -43,12 +55,20 @@
     }
 
     GameManager.prototype.storeStats = function() {
-      return this.environment.codeland.storeGameStats(this.environment.key, this.environment.stats);
+      /*
+          Internal Function (used only by the code in this file)
+      
+          Saves the game statistics to codeland.
+      */
+      this.environment.codeland.storeGameStats(this.environment.key, this.environment.stats);
     };
 
     GameManager.prototype.setUpGame = function() {
       /*
+          Internal Function (used only by the code in this file)
+      
           Sets up everything for the game to run.
+          That is, the code editor, the game visual and the event listeners.
       */
 
       var butdiv, editdiv, vis;
@@ -100,10 +120,23 @@
     };
 
     GameManager.prototype.gameName = function() {
+      /*
+          Internal Function (used only by the code in this file)
+      
+          Returns the key of the current game.
+      */
       return this.environment.key;
     };
 
     GameManager.prototype.startGame = function(waitForCode) {
+      /*
+          Internal Function (used only by the code in this file)
+      
+          This starts the game's visual and initializes the logic for the game.
+      
+          @param waitForCode
+              Whether the game logic should wait for the code to begin running.
+      */
       if (waitForCode == null) {
         waitForCode = false;
       }
@@ -113,6 +146,13 @@
     };
 
     GameManager.prototype.interpretGameConfigMap = function() {
+      /*
+          Internal Function (used only by the code in this file)
+      
+          Parses the map found in the game's config file and creates
+          the necessary characters in the visual and in the gameManager.
+      */
+
       var achar, character, key, map, name, x, y, _base, _base1, _base2, _base3, _ref, _ref1, _ref2, _ref3, _ref4;
 
       x = (_ref = (_base = this.config.game.offset).x) != null ? _ref : _base.x = 0;
@@ -140,6 +180,27 @@
     };
 
     GameManager.prototype.generateCharacter = function(name, x, y, staysOnReset, dir) {
+      /*
+          External Function (used by something outside of this file)
+      
+          Creates a character using the defaults found in the config file,
+          overwriting them as necessary and generating an appropriate name.
+          Places this character in the visual config and in the game's config
+          and makes sure the victory flag is the first item in the visual
+          config's array.
+      
+          @param name
+              The name of the type of character to create
+          @param x
+              The x location of the character
+          @param y
+              The y location of the character
+          @param staysOnReset
+              Whether this character is a permanent part of the game
+          @param dir
+              The direction the character is facing
+      */
+
       var base, baseName, gflag, num, numLength, visualBase;
 
       base = deepcopy(this.config.game.characterBase[name]);
@@ -193,6 +254,13 @@
     };
 
     GameManager.prototype.gameLost = function() {
+      /*
+          External Function (used by something outside of this file)
+      
+          Updates the game statistics on the loss, plays the losing sound,
+          and summons the game lost cloud.
+      */
+
       var messages;
 
       this.updateGameLostStats();
@@ -202,10 +270,28 @@
       return this.gameRunFinished();
     };
 
-    GameManager.prototype.gameWon = function() {
+    GameManager.prototype.gameWon = function(score, stars) {
+      /*
+          External Function (used by something outside of this file)
+      
+          Updates the game statistics on the win, plays the winning sound,
+          and summons the game won cloud.
+      
+          @param score
+              The score the player achieved during this play of the game.
+          @param stars
+              How many stars the player earned during this play of the game.
+      */
+
       var codeland, gameIndex, gameName, messages, questIndex;
 
-      this.updateGameWonStats();
+      if (!score) {
+        score = this.config.winningScore;
+      }
+      if (!stars) {
+        stars = this.config.winningStars;
+      }
+      this.updateGameWonStats(score, stars);
       playAudio('victory.ogg');
       gameName = this.gameName();
       codeland = this.environment.codeland;
@@ -222,6 +308,12 @@
     };
 
     GameManager.prototype.updateGameLostStats = function() {
+      /*
+          Internal Function (used only by the code in this file)
+      
+          Creats the losing statistics and saves them to codeland.
+      */
+
       var s;
 
       s = this.environment.stats;
@@ -234,6 +326,22 @@
     };
 
     GameManager.prototype.updateGameWonStats = function(score, stars) {
+      /*
+          Internal Function (used only by the code in this file)
+      
+          Creates the statistics of the won game and saves them
+          to codeland.
+      
+          @param score
+              The score the player achieved during this play of the game.
+          @param stars
+              How many stars the player earned during this play of the game.
+      
+          @return
+              Whether or not this achieved score is a new high score for the
+              player.
+      */
+
       var isNewHiscore, s;
 
       log("Game Won: " + this.environment.key);
@@ -254,6 +362,12 @@
     };
 
     GameManager.prototype.finishGame = function() {
+      /*
+          External Function (used by something outside of this file)
+      
+          Stops the current game and uninitializes used classes.
+      */
+
       var _ref;
 
       if ((_ref = this.gameState) != null) {
@@ -267,15 +381,30 @@
     };
 
     GameManager.prototype.addEventListeners = function() {
+      /*
+          Internal Function (used only by the code in this file)
+      
+          Sets up the event listeners the game manager responds to.
+      */
       jQuery('#compileAndRun').click(this.runStudentCode);
-      jQuery('#stopRun').click(this.stopStudentCode);
+      jQuery('#stopRun').click(this.resetGame);
       jQuery('#resetState').click(this.reset);
       jQuery('#help').click(this.helpTips);
-      this.codeEditor.onStudentCodeChangeListener(this.startGame.bind(this, false));
+      this.codeEditor.onStudentCodeChangeListener(this.resetGame.bind(this));
       this.codeEditor.onCommandValidation(this.commandsValid);
     };
 
     GameManager.prototype.commandsValid = function(valid) {
+      /*
+          External Function (used by something outside of this file)
+          Event Function (passed in as a callback or bound to a button press)
+      
+          Disables the run button should the commands in the editor be
+          invalid, enables the run button should they be valid.
+      
+          @param valid
+              Whether or not the code in the code editor is valid.
+      */
       if (valid) {
         jQuery('#compileAndRun').attr('disabled', false);
         this.canRun = true;
@@ -286,13 +415,44 @@
     };
 
     GameManager.prototype.reset = function() {
+      /*
+          Event Function (passed in as a callback or bound to a button press)
+      
+          Resets the code editor and the game.
+      */
       this.environment.stats.resetCount += 1;
       this.storeStats();
-      this.codeEditor.resetEditor();
+      this.resetGame();
+      this.resetCode();
+    };
+
+    GameManager.prototype.resetGame = function() {
+      /*
+          Event Function (passed in as a callback or bound to a button press)
+      
+          Resets the game.
+      */
+      this.stopStudentCode();
       this.startGame(false);
     };
 
+    GameManager.prototype.resetCode = function() {
+      /*
+          Internal Function (used only by the code in this file)
+      
+          Resets the student's code.
+      */
+      this.codeEditor.resetEditor();
+    };
+
     GameManager.prototype.runStudentCode = function() {
+      /*
+          Event Function (passed in as a callback or bound to a button press)
+      
+          Scans the code from the code editor and begins running the student's
+          code.
+      */
+
       var code, finish_cb, stdout;
 
       if (this.running) {
@@ -336,6 +496,11 @@
     };
 
     GameManager.prototype.stopStudentCode = function() {
+      /*
+          Internal Function (used only by the code in this file)
+      
+          Stops running the student's code and resets the visual.
+      */
       if (!this.running) {
         return;
       }
@@ -346,21 +511,38 @@
       } else {
         this.showRun();
       }
-      this.startGame(true);
       return false;
     };
 
     GameManager.prototype.showRun = function() {
+      /*
+          Internal Function (used only by the code in this file)
+      
+          Shows the run button.
+      */
       jQuery('#stopRun').hide();
       jQuery('#compileAndRun').show();
       this.running = false;
     };
 
     GameManager.prototype.gameRunFinished = function() {
+      /*
+          Internal Function (used only by the code in this file)
+      
+          Called when a run has finished, currently only re-displays
+          the run button.
+      */
       this.showRun();
     };
 
     GameManager.prototype.helpTips = function() {
+      /*
+          Event Function (passed in as a callback or bound to a button press)
+      
+          Summons the help tips cloud to display the tips associated with
+          this game.
+      */
+
       var conf, ma, title, _ref, _ref1;
 
       this.environment.stats.tipsCount += 1;

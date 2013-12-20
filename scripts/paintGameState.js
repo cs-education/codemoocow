@@ -10,6 +10,10 @@
   }
 
   window.PaintGameState = (function() {
+    /*
+        A class to contain the game logic for paint games.
+    */
+
     var clockHandle;
 
     clockHandle = null;
@@ -22,6 +26,16 @@
       this.gameLost = __bind(this.gameLost, this);
       this.gameWon = __bind(this.gameWon, this);
       this.clock = __bind(this.clock, this);
+      /*
+          Sets up the game's constants and the visual display
+      
+          @param gameManager
+              The game manager running this game
+          @param waitForCode
+              Whether or not to wait for the students code to exectute
+              to start the game (and start checking for events).
+      */
+
       this.gameConfig = deepcopy(this.gameManager.config.game);
       this.gameCommands = new PaintGameCommands(this);
       this.visual = this.gameManager.visual;
@@ -56,10 +70,25 @@
     }
 
     PaintGameState.prototype.getGameCommands = function() {
+      /*
+          External Function (used by something outside of this file)
+      
+          Returns a handle to this games commands (a class).
+      */
       return this.gameCommands;
     };
 
     PaintGameState.prototype.clock = function() {
+      /*
+          Internal Function (used only by the code in this file)
+      
+          The main engine behind the game.
+          This function is called every X milliseconds via setInterval.
+          Each time it is called it updates the visual and every Y times
+          it is called it checks for events and executes the next command
+          in the queue.
+      */
+
       var command;
 
       if (this.startedGame === true) {
@@ -78,8 +107,16 @@
     };
 
     PaintGameState.prototype.checkPainting = function() {
-      var expected, name, pixel, x, y, _i, _j, _ref, _ref1, _ref2, _ref3;
+      /*
+          Internal Function (used only by the code in this file)
+      
+          Returns whether or not the painting has been filled
+          out correctly.
+      */
 
+      var correct, expected, name, pixel, x, y, _i, _j, _ref, _ref1, _ref2, _ref3;
+
+      correct = true;
       _ref = this.gameConfig.characters;
       for (name in _ref) {
         pixel = _ref[name];
@@ -90,22 +127,31 @@
         if (expected === ((_ref1 = this.picture[pixel.x][pixel.y]) != null ? _ref1.color : void 0)) {
           this.picture[pixel.x][pixel.y].matched = true;
         } else {
-          return false;
+          correct = false;
         }
       }
       for (x = _i = 0, _ref2 = this.gameManager.config.visual.grid.gridX; 0 <= _ref2 ? _i <= _ref2 : _i >= _ref2; x = 0 <= _ref2 ? ++_i : --_i) {
         for (y = _j = 0, _ref3 = this.gameManager.config.visual.grid.gridY; 0 <= _ref3 ? _j <= _ref3 : _j >= _ref3; y = 0 <= _ref3 ? ++_j : --_j) {
           pixel = this.picture[x][y];
-          if (!pixel || pixel.matched) {
-            continue;
+          if (pixel) {
+            if (!pixel.matched) {
+              correct = false;
+            }
+            pixel.matched = false;
           }
-          return false;
         }
       }
-      return true;
+      return correct;
     };
 
     PaintGameState.prototype.checkEvents = function() {
+      /*
+          Internal Function (used only by the code in this file)
+      
+          Checks if the gamestate necessitates triggering any event.
+          For paint games it is only necessary if the game finished to
+          check if it was done correctly.
+      */
       if (this.finishedExecuting) {
         if (this.checkPainting()) {
           this.gameWon();
@@ -116,11 +162,29 @@
     };
 
     PaintGameState.prototype.start = function() {
+      /*
+          Internal Function (used only by the code in this file)
+      
+          Starts the game
+      */
       this.startedExecuting = true;
       this.startedGame = true;
     };
 
     PaintGameState.prototype.drawPixel = function(x, y, color) {
+      /*
+          External Function (used by something outside of this file)
+      
+          Places a draw pixel command on the commands queue.
+      
+          @param x
+              The x position of the pixel
+          @param y
+              The y position of the pixel
+          @param color
+              The color of the pixel
+      */
+
       var char;
 
       if (!this.gameManager.config.game.characterBase.hasOwnProperty(color)) {
@@ -131,11 +195,23 @@
       this.picture[x][y] = char;
       this.commands.push({
         key: 'drawPixel',
-        exec: this._drawPixel.bind(this, x, y, color, char)
+        exec: this._drawPixel.bind(this, x, y, char)
       });
     };
 
-    PaintGameState.prototype._drawPixel = function(x, y, color, char) {
+    PaintGameState.prototype._drawPixel = function(x, y, char) {
+      /*
+          Internal Function (used only by the code in this file)
+      
+          Draws the given pixel at the x and y locations with color color.
+      
+          @param x
+              The x position of the pixel
+          @param y
+              The y position of the pixel
+          @param char
+              The pixel to draw
+      */
       if (this.picture[x][y] != null) {
         this.visual.removeCharacter(this.gameManager.config.visual, this.picture[x][y].visual);
       }
@@ -144,6 +220,16 @@
     };
 
     PaintGameState.prototype.getPixel = function(x, y) {
+      /*
+          External Function (used by something outside of this file)
+      
+          Returns the pixel color at position (x, y)
+      
+          @param x
+              The x position of the pixel to query
+          @param y
+              The y position of the pixel to query
+      */
       if (this.picture[x][y]) {
         return this.picture[x][y].color;
       } else {
@@ -152,6 +238,11 @@
     };
 
     PaintGameState.prototype.gameWon = function() {
+      /*
+          Internal Function (used only by the code in this file)
+      
+          Stops the game and reports the win to the game Manager.
+      */
       if (!this.startedGame) {
         return;
       }
@@ -160,6 +251,11 @@
     };
 
     PaintGameState.prototype.gameLost = function() {
+      /*
+          Internal Function (used only by the code in this file)
+      
+          Stops the game and reports the loss to the game Manager.
+      */
       if (!this.startedGame) {
         return;
       }
@@ -168,6 +264,11 @@
     };
 
     PaintGameState.prototype.stopGame = function() {
+      /*
+          External Function (used by something outside of this file)
+      
+          Stops the game.
+      */
       if (clockHandle != null) {
         clearInterval(clockHandle);
       }
@@ -180,20 +281,51 @@
   })();
 
   PaintGameCommands = (function() {
+    /*
+        A class to contain the functions called by the student's
+        Java code for paint games.
+    */
     function PaintGameCommands(gameState) {
       this.gameState = gameState;
       return;
     }
 
     PaintGameCommands.prototype.finishedParsingStartGame = function() {
+      /*
+          Java Function (called by the Java code)
+      
+          Starts the game.
+      */
       this.gameState.start();
     };
 
     PaintGameCommands.prototype.drawPixel = function(x, y, color) {
+      /*
+          Java Function (called by the Java code)
+      
+          Draws a pixel at position (x, y) of color color.
+      
+          @param x
+              The x position of the pixel
+          @param y
+              The y position of the pixel
+          @param color
+              The color of the pixel
+      */
       this.gameState.drawPixel(x, y, color);
     };
 
     PaintGameCommands.prototype.getPixel = function(x, y) {
+      /*
+          Java Function (called by the Java code)
+      
+          Returns the color of the pixel at (x, y)
+      
+          @param x
+              The x position of the pixel to query
+          @param y
+              The y position of the pixel to query
+      */
       return this.gameState.getPixel(x, y);
     };
 

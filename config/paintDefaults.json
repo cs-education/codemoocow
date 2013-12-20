@@ -139,7 +139,7 @@
           "match": "yellow"
         },
         "white": {
-            "sprite": "white"
+          "sprite": "white"
         }
       },
       "key": {

@@ -477,8 +477,6 @@
         return;
       }
       this.stopGame();
-      this.stars = 1;
-      this.score = 5;
       this.gameManager.gameWon(this.score, this.stars);
     };
 

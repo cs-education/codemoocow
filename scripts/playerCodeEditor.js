@@ -431,6 +431,9 @@
         gutterOffset = this.editor.editor.renderer.$gutterLayer.gutterWidth + ((_ref1 = this.editor.editor.renderer.$gutterLayer.$padding) != null ? _ref1.left : void 0);
         this.parameterPopUp.css('top', "12px");
         this.parameterPopUp.css('left', gutterOffset + 5);
+        this.parameterPopUp.mousedown(function(mousedownEvent) {
+          mousedownEvent.stopPropagation();
+        });
         this.parameterPopUp.show();
         setTimeout((function() {
           jQuery("#" + command + "-parameter-" + 1).focus();
