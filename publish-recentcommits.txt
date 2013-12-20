@@ -1,5 +1,5 @@
+1dfedca fixed gh-pages-config
 7f108b5 allows coursera-integration to be published (but no longer master)
 b0ba7e8 hiding integration for now
 0637c69 making progress, running into Access-Control-Allow-Origin issue
 8247d7e added default maxScore to non-gameType specific config
-eff6d10 Merge branch 'master' into coursera-integration
