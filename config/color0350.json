@@ -1,0 +1,50 @@
+{
+  "title": "Paint upon paint",
+  "description": "",
+  "task": "",
+  "tags": "intro",
+  "gameType": "paint",
+  "backEnd": "doppio",
+  "editor": {
+    "freeformEditting": false,
+    "buttons": [
+      "switchUp",
+      "switchDown"
+    ],
+    "commands": {}
+  },
+  "code": {
+    "prefix": "void paint() { \n",
+    "postfix": "return; // I'm done!\n} // Code statements belong inside this paint method",
+    "initial": [
+      "drawPixel(1,5,\"blue\");",
+      "drawPixel(5,1,\"red\");",
+      "drawPixel(5,1,\"yellow\");",
+      "drawPixel(1,5,\"purple\");",
+      "drawPixel(3,3,\"yellow\");",
+      "drawPixel(3,3,\"red\");"
+    ],
+    "comments": [
+      "Color Puzzle #3 - 'Paint upon paint'",
+"Hint: No delete? You'll just need to repaint it!",
+"Use the up-down buttons to swap the order of the lines.",
+"Functions available in this level:",
+"drawPixel(x, y, color): draws the pixel at the coordinate (x,y) the given color"
+    ]
+  },
+  "game": {
+    "map": [
+      "",
+      ".....R",
+      "",
+      "...Y",
+      "",
+      ".U"
+    ],
+    "offset": {
+        "x": 0,
+        "y": 0
+    }
+  },
+  "dyk": []
+}

@@ -1,0 +1,44 @@
+
+
+{
+  "title": "If-in-a-loop",
+  "description": "",
+  "task": "",
+  "tags": "intro",
+  "gameType": "paint",
+  "backEnd": "doppio",
+  "editor": {
+    "freeformEditting": false,
+    "buttons": [
+      "insertButtons","deleteLine"
+      
+    ],
+    "commands": {
+      "shorthand": [  "if(x < 6) { drawPixel(x,0,\"black\");}",  "else { drawPixel(x,1,\"blue\");}" , "if(x < 4) { drawPixel(x,0,\"red\");}"]
+    }
+  },
+  "code": {
+    "prefix": [
+      "void paint() {",
+       "int x = 0;",
+       "while(x <= 7) {"
+    ],
+	"initial" : "",
+    "postfix": "\tx = x + 1;\n\t}\nreturn;\n}",
+    "comments": [
+      "Color Puzzle #16 - 'If-in-a-loop'","\"Insert coin...Well... Insert code to play!\"",
+      "Functions available in this level:",
+"drawPixel(x, y, color): draws the pixel at the coordinate (x,y) the given color"
+    ]
+  },
+  "game": {
+    "map": [
+"RRRR","....UUUU"
+    ],
+    "offset": {
+      "x": 0,
+      "y": 0
+    }
+  },
+  "dyk": []
+}
