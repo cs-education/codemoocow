@@ -1,0 +1,52 @@
+{
+  "title": "1-4-1-4...",
+  "description": "",
+  "gameType": "paint",
+  "backEnd": "doppio",
+  "editor": {
+    "freeformEditting": false,
+    "buttons": [
+      "switchUp",
+      "switchDown",
+      "deleteLine",
+      "insertButtons"
+    ],
+    "commands": {
+      "shorthand": [
+      {
+        "line": "y = 5 - y;",
+        "maxUses": 4
+      },
+      {
+        "line": "x = 5 - x;",
+        "maxUses": 4
+      },
+      {
+        "line": "drawPixel(x , y , \"blue\");",
+        "maxUses": 5
+      }
+      ]
+    }
+  },
+  "code": {
+    "prefix": [
+      "void paint() {",
+      "int x = 1;",
+      "int y = 1;"
+
+    ],
+    "postfix": "return;\n}",
+    "comments": [
+      "Color Puzzle #11 - '1-4-1-4...'",
+      "x = 5 - x, what will be the new value of x if x is currently 1?",
+      "Functions available in this level:",
+      "drawPixel(x, y, color): draws the pixel at the coordinate (x,y) the given color"
+    ]
+  },
+  "game": {
+    "map": [
+      "",".U..U","","",".U..U"
+    ]
+  },
+  "dyk": []
+}

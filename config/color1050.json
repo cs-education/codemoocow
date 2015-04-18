@@ -1,0 +1,52 @@
+{
+  "title": "Value swap",
+  "description": "",
+  "gameType": "paint",
+  "backEnd": "doppio",
+  "editor": {
+    "freeformEditting": false,
+    "buttons": [
+      "switchUp",
+      "switchDown",
+      "deleteLine",
+      "insertButtons"
+    ],
+    "commands": {
+      "shorthand": [
+        "x = y;",
+        "temp = x;",
+        "y = temp;",
+        "drawPixel(x , y , \"blue\");",
+        "drawPixel(x , y , \"pink\");"
+      ]
+    }
+  },
+  "code": {
+    "prefix": [
+      "void paint() {",
+      "int x = 6;",
+      "int y = 3;",
+      "int temp = 0;"
+    ],
+    "postfix": "return;\n}",
+    "comments": [
+      "Color Puzzle #10 - 'Value swap",
+      "To solve this puzzle you will need to swap the values stored in x and y.",
+"Hint: You'll need the third variable to keep a copy of the original value.",
+"Functions available in this level:",
+"drawPixel(x, y, color): draws the pixel at the coordinate (x,y) the given color"
+    ]
+  },
+  "game": {
+    "map": [
+      "",
+      "",
+      "",
+      "......U",
+      "",
+      "",
+      "...P"
+    ]
+  },
+  "dyk": []
+}

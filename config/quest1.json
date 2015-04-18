@@ -1,0 +1,32 @@
+{ "key" : "sequence",
+  "title" : "Code Sequence",
+  "games": [
+"seq0150",
+"seq0250",
+"seq0350",
+"seq0450",
+"seq0550",
+"seq0650",
+"seq0750",
+"seq0850",
+"seq0950",
+"seq1050",
+"seq1150"
+  ],
+  "commands": [
+    "go(I)V",
+    "turn(I)V",
+    "turn(Ljava/lang/String;)V",
+    "turnRight()V",
+    "turnLeft()V",
+    "turnAndGo(I,I)V",
+    "turnAndGo(Ljava/lang/String;,I)V",
+    "goNorth(I)V",
+    "goEast(I)V",
+    "goSouth(I)V",
+    "goWest(I)V",
+    "mysteryA()V",
+    "mysteryB()V",
+    "mysteryC()V"
+  ]
+}

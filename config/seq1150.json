@@ -1,0 +1,59 @@
+{
+  "title": "Three solutions? Jump for joy!",
+  "description": "Maze",
+  "task": "",
+  "tags": "intro",
+  "gameType": "grid",
+  "backEnd": "interpreter",
+  "editor": {
+    "freeformEditting": false,
+    "buttons": [
+      "switchUp",
+      "switchDown",
+      "deleteLine",
+      "insertButtons"
+    ],
+    "commands": {
+      "go": {
+        "inputs": 1,
+        "maxUses": 6
+      },
+      "jump": {
+        "inputs": 0,
+        "maxUses": 1
+      },
+      "turnRight": {
+        "inputs": 0,
+        "maxUses": 20
+      }
+    }
+  },
+  "code": {
+    "shorthand": "",
+	"comments" : [ "Java Puzzle #11 - 'Three solutions? Jump for joy!'",
+	"There are two obvious ways to solve this puzzle.",
+	"With some careful thinking a fast third way may jump out at you.",
+  "Functions available in this level:",
+  "go(number): moves the avatar forward a given number of spaces",
+  "turnRight(): turns the avatar to the left.",
+  "jump(): jumps over the space directly in front of the avatar and lands on the space two in front of the avatar"
+	]
+  },
+  "game": {
+    "characterBase": {
+      "protagonist": {
+        "dir": 0
+      },
+      "guard": {
+        "dir": 0
+      }
+    },
+    "map": "XXXXXXXXXX\nX.G..P...X\nX.XXXXXX.X\nX.XXFXXX.X\nX.XX.XXXGX\nX.XX.XXX.X\nX........X\nXXXXXXXXXX\n",
+    "offset": {
+      "x": 0,
+      "y": 0
+    }
+  },
+  "help": [],
+  "dyk": []
+}
