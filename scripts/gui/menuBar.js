@@ -13,7 +13,7 @@
     $(headline).attr({
         "class":"menu_headline",
     });
-    $(headline).append("<span class='cursiveHeadline' style='margin-left=0px'>CodeMoo Java</span>")
+    $(headline).append("<span class='cursiveHeadline' style='margin-left=0px'>CodeMooCow Java</span>")
 
     // game selection button
     title = document.createElement("li");

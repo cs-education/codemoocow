@@ -17,6 +17,6 @@
     },
     "header":{
         "h1":"<span style='font-size:100%' class='cursiveHeadline'>Choose a level below.</span><br><br>",
-        "h2":"<span style='font-size:200%' class='cursiveHeadline'>CodeMoo Java Game</span><br>"
+        "h2":"<span style='font-size:200%' class='cursiveHeadline'>CodeMooCow Java Game</span><br>"
     }
 }
